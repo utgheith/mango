@@ -1,7 +1,7 @@
 #include "mango.h"
 
 constexpr Nat<3> x{5};
-constexpr Nat<5> y{7};
+constexpr Nat<64> y{77};
 constexpr Nat<0> zero;
 
 int main() {

@@ -45,7 +45,7 @@ class NatImpl<N> {
 
   constexpr NatImpl(const uint64_t low = 0)
       : low(low << SLACK >> SLACK), high{} {}
-  constexpr NatImpl(const NatImpl<Width<HIGH>> &high, uint64_t low)
+  constexpr NatImpl(const NatImpl<Width<HIGH>> high, const uint64_t low)
       : low(low << SLACK >> SLACK), high(high) {}
 };
 
@@ -71,7 +71,9 @@ class NatImpl<N> {
     if constexpr (OUT_WIDTH <= 64) {
       return Nat<OUT_WIDTH>(low + rhs.low);
     } else {
-      static_assert(false);
+      const uint64_t sum = low + rhs.low;
+      const Nat<OUT_WIDTH-64> high(((sum < low) || (sum < rhs.low)) ? 1 : 0);
+      return Nat<OUT_WIDTH>(high, sum);
     }
   }
 };
