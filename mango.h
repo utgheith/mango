@@ -7,6 +7,8 @@
 #include <string>
 #include <type_traits>
 
+namespace mango {
+
 template <typename T>
 constexpr T max(T a, T b) {
   return a > b ? a : b;
@@ -30,8 +32,17 @@ template <typename T>
   requires Big<T> || Small<T> || Zero<T>
 class NatImpl;
 
+/////////
+// Nat //
+/////////
+
 template <uint16_t N>
 using Nat = NatImpl<Width<N>>;
+
+///////////////////////////////
+// Big                       //
+//     Nat<N-64> || uint64_t //
+///////////////////////////////
 
 template <Big N>
 class NatImpl<N> {
@@ -48,6 +59,11 @@ class NatImpl<N> {
   constexpr NatImpl(const NatImpl<Width<HIGH>> high, const uint64_t low)
       : low(low << SLACK >> SLACK), high(high) {}
 };
+
+//////////////////
+// Small        //
+//     uint64_t //
+//////////////////
 
 template <Small N>
 class NatImpl<N> {
@@ -72,11 +88,15 @@ class NatImpl<N> {
       return Nat<OUT_WIDTH>(low + rhs.low);
     } else {
       const uint64_t sum = low + rhs.low;
-      const Nat<OUT_WIDTH-64> high(((sum < low) || (sum < rhs.low)) ? 1 : 0);
+      const Nat<OUT_WIDTH - 64> high(((sum < low) || (sum < rhs.low)) ? 1 : 0);
       return Nat<OUT_WIDTH>(high, sum);
     }
   }
 };
+
+//////////
+// Zero //
+//////////
 
 template <Zero N>
 class NatImpl<N> {
@@ -91,6 +111,10 @@ class NatImpl<N> {
   }
 };
 
+////////////
+// Output //
+////////////
+
 template <typename T>
   requires Big<T> || Small<T> || Zero<T>
 inline std::ostream &operator<<(std::ostream &os, const NatImpl<T> &nat) {
@@ -104,3 +128,5 @@ inline std::ostream &operator<<(std::ostream &os, const NatImpl<T> &nat) {
   }
   return os;
 }
+
+}  // namespace mango

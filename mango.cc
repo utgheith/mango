@@ -1,5 +1,9 @@
 #include "mango.h"
 
+#include <iostream>
+
+using namespace mango;
+
 constexpr Nat<3> x{5};
 constexpr Nat<64> y{77};
 constexpr Nat<0> zero;
