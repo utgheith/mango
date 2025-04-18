@@ -23,12 +23,18 @@ constexpr T max(T a, T b) {
 template <uint16_t N>
 struct Nat;
 
+/////////////
+// NatBase //
+/////////////
+
+struct NatBase {};
+
 ////////////
 // Nat<0> //
 ////////////
 
 template <>
-struct Nat<0> {
+struct Nat<0> : public NatBase {
   constexpr static uint64_t low = 0;
 
   constexpr Nat() {}
@@ -51,6 +57,8 @@ struct Nat<0> {
 
   template <uint16_t M>
   constexpr const Nat<M + 1> operator+(const Nat<M>& rhs) const;
+
+  constexpr const Nat<0> operator~() const { return *this; }
 };
 
 ////////////
@@ -89,6 +97,8 @@ struct Nat {
       }
     }
   }
+
+  constexpr const Nat<N> operator~() const { return {~high, ~low}; }
 
   template <uint16_t M>
   constexpr const Nat<max(N, M) + 1> add_with_carry(const Nat<M>& rhs,
@@ -137,7 +147,7 @@ inline std::ostream& operator<<(std::ostream& os, const Nat<N>& nat) {
   if constexpr (N > 64) {
     os << nat.high << ":";
   }
-  os << nat.low;
+  os << std::format("{:x}", nat.low);
   return os;
 }
 

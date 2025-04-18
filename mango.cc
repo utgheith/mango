@@ -27,6 +27,7 @@ int main() {
   SHOW(Nat<500>{x});
   SHOW(big.succ());
   SHOW(x + y);
+  SHOW(~Nat<100>{});
 
   // std::cout << zero + x << std::endl;
   // std::cout << zero + x << std::endl;
