@@ -1,4 +1,5 @@
 #include "mango.h"
+#include "int.h"
 
 #include <iostream>
 
@@ -16,6 +17,17 @@ void show(const char* msg, Nat<N> const& v) {
   std::cout << std::endl;
 }
 
+template <uint16_t N>
+void show(const char* msg, Int<N> const& v) {
+  std::cout << "[" << msg << "] ";
+  std::cout << "Int<" << N << ">{" << v << "}";
+  std::cout << std::endl;
+}
+
+void show(const char* msg, const bool v) {
+  std::cout << "[" << msg << "] " << v << std::endl;
+}
+
 #define SHOW(x) show(#x, x)
 
 int main() {
@@ -28,6 +40,10 @@ int main() {
   SHOW(big.succ());
   SHOW(x + y);
   SHOW(~Nat<100>{});
+  SHOW(Int(x));
+  SHOW(-Int(x));
+  SHOW(x == y);
+  SHOW(x == big);
 
   // std::cout << zero + x << std::endl;
   // std::cout << zero + x << std::endl;

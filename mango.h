@@ -60,6 +60,13 @@ struct Nat<0> : public NatBase {
   constexpr const Nat<M + 1> operator+(const Nat<M>& rhs) const;
 
   constexpr const Nat<0> operator~() const { return *this; }
+
+  template <uint16_t M>
+  constexpr const bool operator ==(const Nat<M>& rhs) const {
+    if constexpr (M == 0) return true;
+    if (rhs.low != 0) return false;
+    return *this == rhs.upper();
+  }
 };
 
 ////////////
@@ -122,6 +129,12 @@ struct Nat {
   template <uint16_t M>
   constexpr const Nat<max(N, M) + 1> operator+(const Nat<M>& rhs) const {
     return *this + std::pair(rhs, Nat<1>{0});
+  }
+
+  template <uint16_t M>
+  constexpr const bool operator ==(const Nat<M>& rhs) const {
+    if (low != rhs.low) return false;
+    return high == rhs.upper();
   }
 };
 

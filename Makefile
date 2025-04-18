@@ -1,4 +1,4 @@
-CC_FLAGS = -std=c++23 -O0 -g -Wall -Werror
+CC_FLAGS = -std=c++23 -O3 -g -Wall -Werror
 CC_FILES = ${wildcard *.cc}
 
 O_FILES = ${patsubst %.cc, %.o, ${CC_FILES}}
