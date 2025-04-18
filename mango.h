@@ -6,6 +6,7 @@
 #include <iostream>
 #include <string>
 #include <type_traits>
+#include <utility>
 
 namespace mango {
 
@@ -52,8 +53,8 @@ struct Nat<0> : public NatBase {
   constexpr const Nat<1> succ() const;
 
   template <uint16_t M>
-  constexpr const Nat<M + 1> add_with_carry(const Nat<M>& rhs,
-                                            const Nat<1>& carry) const;
+  constexpr const Nat<M + 1> operator+(
+      const std::pair<Nat<M>, Nat<1>>& rhs) const;
 
   template <uint16_t M>
   constexpr const Nat<M + 1> operator+(const Nat<M>& rhs) const;
@@ -101,41 +102,46 @@ struct Nat {
   constexpr const Nat<N> operator~() const { return {~high, ~low}; }
 
   template <uint16_t M>
-  constexpr const Nat<max(N, M) + 1> add_with_carry(const Nat<M>& rhs,
-                                                    const Nat<1>& carry) const {
+  constexpr const Nat<max(N, M) + 1> operator+(
+      const std::pair<Nat<M>, Nat<1>>& rhs) const {
+    const auto the_rhs = rhs.first;
+    const auto the_carry = rhs.second;
+
     const auto low128 =
-        uint128_t(low) + uint128_t(rhs.low) + uint128_t(carry.low);
+        uint128_t(low) + uint128_t(the_rhs.low) + uint128_t(the_carry.low);
     const auto low64 = uint64_t(low128);
 
     if (low128 != uint128_t(low64)) {
       // carry
-      return {high.add_with_carry(rhs.upper(), Nat<1>{1}), low64};
+      return {high + std::pair(the_rhs.upper(), Nat<1>{1}), low64};
     } else {
-      return {high + rhs.upper(), low64};
+      return {high + the_rhs.upper(), low64};
     }
   }
 
   template <uint16_t M>
   constexpr const Nat<max(N, M) + 1> operator+(const Nat<M>& rhs) const {
-    return add_with_carry(rhs, Nat<1>{0});
+    return *this + std::pair(rhs, Nat<1>{0});
   }
 };
 
 constexpr const Nat<1> Nat<0>::succ() const { return Nat<1>{1}; }
 
 template <uint16_t M>
-constexpr const Nat<M + 1> Nat<0>::add_with_carry(const Nat<M>& rhs,
-                                                  const Nat<1>& carry) const {
-  if (carry.low == 0) {
-    return Nat<M + 1>{rhs};
+constexpr const Nat<M + 1> Nat<0>::operator+(
+    const std::pair<Nat<M>, Nat<1>>& rhs) const {
+  const auto the_rhs = rhs.first;
+  const auto the_carry = rhs.second;
+  if (the_carry.low == 0) {
+    return Nat<M + 1>{the_rhs};
   } else {
-    return rhs.succ();
+    return the_rhs.succ();
   }
 }
 
 template <uint16_t M>
 constexpr const Nat<M + 1> Nat<0>::operator+(const Nat<M>& rhs) const {
-  return add_with_carry(rhs, Nat<1>{0});
+  return *this + std::pair(rhs, Nat<1>{0});
 }
 
 ////////////
