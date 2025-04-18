@@ -1,7 +1,8 @@
 #include "mango.h"
-#include "int.h"
 
 #include <iostream>
+
+#include "int.h"
 
 using namespace mango;
 

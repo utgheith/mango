@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mango.h"
+#include "nat.h"
 
 namespace mango {
 
@@ -9,21 +9,19 @@ struct Int {
   const Nat<N> abs;
   const bool is_negative;
 
-  constexpr Int(Nat<N> abs = {}, bool is_negative = false) : abs(abs), is_negative(is_negative) {}
+  constexpr Int(Nat<N> abs = {}, bool is_negative = false)
+      : abs(abs), is_negative(is_negative) {}
 
-  constexpr Int<N> operator-() const {
-    return {abs, !is_negative};
-  }
+  constexpr Int<N> operator-() const { return {abs, !is_negative}; }
 
   template <uint16_t M>
-  constexpr Int<max(M,N)+1> operator+(
-      const Int<M>& rhs) const {
-        if (is_negative == rhs.is_negative) {
-          return {abs + rhs.abs, is_negative};
-        } else {
-          throw "";
-        }
-      }
+  constexpr Int<max(M, N) + 1> operator+(const Int<M>& rhs) const {
+    if (is_negative == rhs.is_negative) {
+      return {abs + rhs.abs, is_negative};
+    } else {
+      throw "";
+    }
+  }
 };
 
 ////////////
