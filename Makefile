@@ -13,7 +13,7 @@ ${O_FILES} : %.o : %.cc Makefile
 
 
 format:
-	clang-format -style=Google -Werror -i *.cc *.h
+	clang-format -style=Google -Werror -i *.cc mango/*.h
 
 clean:
 	rm -rf *.o *.d main
