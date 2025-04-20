@@ -14,6 +14,10 @@ struct Int {
 
   constexpr Int<N> operator-() const { return {abs, !is_negative}; }
 
+  constexpr Int<N> operator~() const {
+    return {~abs, is_negative};
+  }
+
   template <uint16_t M>
   constexpr Int<max(M, N) + 1> operator+(const Int<M>& rhs) const {
     if (is_negative == rhs.is_negative) {

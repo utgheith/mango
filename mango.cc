@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "mango/int.h"
+#include "mango/ranged_int.h"
 
 using namespace mango;
 
@@ -29,6 +30,11 @@ void show(const char* msg, const bool v) {
   std::cout << "[" << msg << "] " << v << std::endl;
 }
 
+template <uint16_t A, Int<A> MIN, uint16_t B, Int<B> MAX>
+void show(const char* msg, const RangedInt<A, MIN, B, MAX>& v) {
+  std::cout << "[" << msg << "] " << v << std::endl;
+}
+
 #define SHOW(x) show(#x, x)
 
 int main() {
@@ -45,6 +51,10 @@ int main() {
   SHOW(-Int(x));
   SHOW(x == y);
   SHOW(x == big);
+
+
+  SHOW(unsignedInt(x));
+  SHOW(unsignedInt(x)+unsignedInt(y));
 
   // std::cout << zero + x << std::endl;
   // std::cout << zero + x << std::endl;
