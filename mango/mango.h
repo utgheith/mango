@@ -21,4 +21,6 @@ constexpr T max(T a, T b) {
   return (a > b) ? a : b;
 }
 
+enum struct Cmp { LT = -1, EQ = 0, GT = 1 };
+
 }  // namespace mango

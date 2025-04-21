@@ -20,9 +20,9 @@ void show(const char* msg, Nat<N> const& v) {
 }
 
 template <uint16_t N>
-void show(const char* msg, Int<N> const& v) {
+void show(const char* msg, UInt<N> const v) {
   std::cout << "[" << msg << "] ";
-  std::cout << "Int<" << N << ">{" << v << "}";
+  std::cout << "UInt<" << N << ">{" << v << "}";
   std::cout << std::endl;
 }
 
@@ -47,14 +47,13 @@ int main() {
   SHOW(big.succ());
   SHOW(x + y);
   SHOW(~Nat<100>{});
-  SHOW(Int(x));
-  SHOW(-Int(x));
+  SHOW(UInt(x));
+  // SHOW(-UInt(x));
   SHOW(x == y);
   SHOW(x == big);
 
-
-  SHOW(unsignedInt(x));
-  SHOW(unsignedInt(x)+unsignedInt(y));
+  SHOW(UInt(x));
+  // SHOW(UInt(x) + UInt(y));
 
   // std::cout << zero + x << std::endl;
   // std::cout << zero + x << std::endl;

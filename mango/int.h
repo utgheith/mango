@@ -4,44 +4,29 @@
 
 namespace mango {
 
-template <uint16_t N>
-struct Int {
+template <uint16_t N, Nat<N> MIN = Nat<N>{}, Nat<N> MAX = ~Nat<N>{}>
+struct UInt {
   const Nat<N> abs;
-  const bool is_negative;
 
-  constexpr Int(Nat<N> abs = {}, bool is_negative = false)
-      : abs(abs), is_negative(is_negative) {}
+  constexpr UInt(Nat<N> abs = MIN) : abs(abs) {}
 
-  constexpr Int<N> operator-() const { return {abs, !is_negative}; }
+  constexpr UInt<N, ~MAX, ~MIN> operator~() const { return {~abs}; }
 
-  constexpr Int<N> operator~() const {
-    return {~abs, is_negative};
-  }
-
-  template <uint16_t M>
-  constexpr Int<max(M, N) + 1> operator+(const Int<M>& rhs) const {
-    if (is_negative == rhs.is_negative) {
-      return {abs + rhs.abs, is_negative};
-    } else {
-      throw "";
-    }
+  template <uint16_t M, Nat<M> MIN2, Nat<M> MAX2>
+  constexpr const auto operator+(const UInt<M, MIN2, MAX2>& rhs) const {
+    return UInt<max(N, M) + 1, MIN + MIN2, MAX + MAX2>{abs + rhs.abs};
   }
 };
+
+};  // namespace mango
 
 ////////////
 // Output //
 ////////////
 
-template <uint16_t N>
-inline std::ostream& operator<<(std::ostream& os, const Int<N>& i) {
-  if (i.is_negative) {
-    os << "-(";
-  }
+template <uint16_t N, mango::Nat<N> MIN, mango::Nat<N> MAX>
+inline std::ostream& operator<<(std::ostream& os,
+                                const mango::UInt<N, MIN, MAX>& i) {
   os << i.abs;
-  if (i.is_negative) {
-    os << ")";
-  }
   return os;
 }
-
-}  // namespace mango

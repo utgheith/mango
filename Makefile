@@ -1,22 +1,17 @@
-CC_FLAGS = -std=c++23 -O3 -g -Wall -Werror
-CC_FILES = ${wildcard *.cc}
 
-O_FILES = ${patsubst %.cc, %.o, ${CC_FILES}}
+all: .build
+	(cd build ; ninja)
 
-all : main
-
-main : ${O_FILES} Makefile
-	g++ -o main ${O_FILES}
-
-${O_FILES} : %.o : %.cc Makefile
-	g++ -MMD ${CC_FLAGS} -c $*.cc
-
+.build:
+	rm -rf build
+	mkdir -p build
+	(cd build; cmake -G Ninja ..)
+	touch .build
 
 format:
 	clang-format -style=Google -Werror -i *.cc mango/*.h
 
 clean:
-	rm -rf *.o *.d main
+	rm -rf build .build
 
--include *.d
 
