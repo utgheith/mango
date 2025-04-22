@@ -11,7 +11,7 @@ test: Makefile .build.${BUILD_TYPE}
 format: Makefile .build.${BUILD_TYPE}
 	(cd ${BUILD_DIR} && ninja clang-format)
 
-.build.${BUILD_TYPE}: Makefile .setup
+.build.${BUILD_TYPE}: meson.build Makefile .setup
 	meson setup --reconfigure --buildtype ${BUILD_TYPE} --werror ${BUILD_DIR} .
 	touch .build.${BUILD_TYPE}
 

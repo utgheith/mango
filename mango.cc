@@ -4,6 +4,7 @@
 
 #include "mango/int.h"
 #include "mango/ranged_int.h"
+#include "mango/nat.h"
 #include "gtest/gtest.h"
 
 using namespace mango;
@@ -58,6 +59,28 @@ TEST(Nat, Add) {
   auto r = n + m;
   EXPECT_EQ(r.WIDTH, 7);
   EXPECT_EQ(r.low, 12);
+}
+
+TEST(Nat, Factory) {
+  auto x = nat();
+  EXPECT_EQ(x.WIDTH, 0);
+  EXPECT_EQ(nat(7).WIDTH, 32);
+  EXPECT_EQ(nat(7,8).WIDTH, 64);
+  EXPECT_EQ(nat(0x1, 0x2), nat(UINT64_C(0x0000000100000002)));
+}
+
+TEST(Int, DefaultConstructor) {
+  UInt<0> i{};
+  EXPECT_EQ(i.WIDTH, 0);
+  EXPECT_EQ(i.MIN_VALUE, nat());
+  EXPECT_EQ(i.MAX_VALUE, nat());
+  EXPECT_EQ(i.abs.low, 0);
+
+  UInt<3> i3{5};
+  EXPECT_EQ(i3.WIDTH, 3);
+  EXPECT_EQ(i3.MIN_VALUE, nat());
+  EXPECT_EQ(i3.MAX_VALUE, nat(7));
+  EXPECT_EQ(i3.abs.low, 5);
 }
 
 int main(int argc, char **argv) {

@@ -6,6 +6,9 @@ namespace mango {
 
 template <uint16_t N, Nat<N> MIN = Nat<N>{}, Nat<N> MAX = ~Nat<N>{}>
 struct UInt {
+  constexpr static uint16_t WIDTH = N;
+  constexpr static Nat<N> MIN_VALUE = MIN;
+  constexpr static Nat<N> MAX_VALUE = MAX;
   const Nat<N> abs;
 
   constexpr UInt(Nat<N> abs_ = MIN) : abs(abs_) {}
