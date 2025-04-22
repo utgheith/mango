@@ -119,26 +119,39 @@ struct Nat {
 
   template <uint16_t M>
   constexpr const Nat<max(N, M) + 1> add_with_carry(
-      const Nat<M>& rhs, const Nat<1>& carry_in) const {
-    auto new_low = (low + rhs.low + carry_in.low) & Nat<max(N, M) + 1>::MASK;
-    auto carry_out = (new_low < low || new_low < rhs.low);
-
-    if (carry_out) {
-      // no carry
-      return {high + rhs.upper(), low + rhs.low};
+      const Nat<M>& rhs, const Nat<1>& carry_in) const noexcept {
+    if constexpr (M > N) {
+      return rhs.add_with_carry(*this, carry_in);
     } else {
-      // carry
-      return {high.add_with_carry(rhs.upper(), Nat<1>{1}), new_low};
+      static_assert(N >= M);
+      static_assert(N >= 0);
+
+      // mod 2^64
+      auto new_low = low + rhs.low + carry_in.low;
+      if constexpr (M >= 64) {
+        static_assert(~MASK == uint64_t(0));
+        auto new_low = low + rhs.low + carry_in.low;
+        if (new_low < low) {
+          // carry
+          auto new_high = high.add_with_carry(rhs.upper(), Nat<1>{1});
+          return {new_high, new_low};
+        } else {
+          return {high + rhs.upper() + new_low};
+        }
+      } else {
+        return {new_low};
+      }
     }
   }
 
   template <uint16_t M>
-  constexpr const Nat<max(N, M) + 1> operator+(const Nat<M>& rhs) const {
+  constexpr const Nat<max(N, M) + 1> operator+(
+      const Nat<M>& rhs) const noexcept {
     return add_with_carry(rhs, Nat<1>{0});
   }
 
   template <uint16_t M>
-  constexpr bool operator==(const Nat<M>& rhs) const {
+  constexpr bool operator==(const Nat<M>& rhs) const noexcept {
     if (low != rhs.low) return false;
     return high == rhs.upper();
   }
@@ -155,8 +168,6 @@ constexpr const Nat<M + 1> Nat<0>::add_with_carry(
     return rhs.succ();
   }
 }
-
-
 
 ////////////
 // Output //

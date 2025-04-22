@@ -2,10 +2,9 @@
 
 #include <iostream>
 
+#include "gtest/gtest.h"
 #include "mango/int.h"
 #include "mango/ranged_int.h"
-
-#include "gtest/gtest.h"
 
 using namespace mango;
 
@@ -15,7 +14,6 @@ constexpr Nat<64> y{77};
 constexpr Nat<0> zero;
 constexpr Nat<1000> big{x};
 #endif
-
 
 TEST(Nat, DefaultConstructor) {
   Nat<0> n;
@@ -61,10 +59,6 @@ TEST(Nat, Add) {
   EXPECT_EQ(r.WIDTH, 7);
   EXPECT_EQ(r.low, 12);
 }
-
-
-
-
 
 int main(int argc, char **argv) {
   printf("hello\n");
