@@ -1,20 +1,20 @@
 
-all: .build
-	(cd build ; ninja)
+compile : Makefile .build
+	(cd build && meson compile)
 
-.build:
-	rm -rf build
-	mkdir -p build
-	(cd build; cmake -G Ninja ..)
+test: Makefile .build
+	(cd build && meson test)
+
+.build: Makefile .setup
+	meson build --reconfigure
 	touch .build
 
-format:
-	clang-format -style=Google -Werror -i *.cc mango/*.h
-
-test: all
-	(cd build && ./mango)
+.setup: Makefile
+	-mkdir -p subprojects
+	-meson wrap install gtest
+	-touch .setup
 
 clean:
-	rm -rf build .build
+	rm -rf .build build
 
 
