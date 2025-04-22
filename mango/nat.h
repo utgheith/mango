@@ -44,16 +44,14 @@ struct Nat<0> {
   constexpr const Nat<1> succ() const;
 
   template <uint16_t M>
-  constexpr const Nat<M + 1> operator+(
-      const std::pair<Nat<M>, Nat<1>>& rhs) const;
-
-  template <uint16_t M>
-  constexpr const Nat<M + 1> operator+(const Nat<M>& rhs) const;
+  constexpr const Nat<M> operator+(const Nat<M>& rhs) const {
+    return rhs;
+  }
 
   constexpr const Nat<0> operator~() const { return *this; }
 
   template <uint16_t M>
-  constexpr const bool operator==(const Nat<M>& rhs) const {
+  constexpr bool operator==(const Nat<M>& rhs) const {
     if constexpr (M == 0) return true;
     if (rhs.low != 0) return false;
     return *this == rhs.upper();
@@ -75,7 +73,7 @@ struct Nat {
   constexpr static uint16_t WIDTH = N;
   constexpr static uint16_t SLACK = (N > 64) ? 0 : 64 - N;
   constexpr static uint64_t MASK =
-      (SLACK == 0) ? ~uint64_t{0} : (1ULL << SLACK) - 1;
+      (SLACK == 0) ? ~uint64_t{0} : (uint64_t(1) << WIDTH) - 1;
 
   constexpr const Nat<safe_sub(N, 64)> upper() const { return high; }
 
@@ -116,7 +114,7 @@ struct Nat {
                                          const bool borrow) const {
     return {high.sub_with_borrow(rhs.upper(),
                                  borrow ? low <= rhs.low : low < rhs.low),
-            (low - borrow ? 1 : 0) - rhs.low};
+            (low - (borrow ? 1 : 0)) - rhs.low};
   }
 
   template <uint16_t M>
@@ -140,7 +138,7 @@ struct Nat {
   }
 
   template <uint16_t M>
-  constexpr const bool operator==(const Nat<M>& rhs) const {
+  constexpr bool operator==(const Nat<M>& rhs) const {
     if (low != rhs.low) return false;
     return high == rhs.upper();
   }
@@ -158,22 +156,7 @@ constexpr const Nat<M + 1> Nat<0>::add_with_carry(
   }
 }
 
-template <uint16_t M>
-constexpr const Nat<M + 1> Nat<0>::operator+(
-    const std::pair<Nat<M>, Nat<1>>& rhs) const {
-  const auto the_rhs = rhs.first;
-  const auto the_carry = rhs.second;
-  if (the_carry.low == 0) {
-    return Nat<M + 1>{the_rhs};
-  } else {
-    return the_rhs.succ();
-  }
-}
 
-template <uint16_t M>
-constexpr const Nat<M + 1> Nat<0>::operator+(const Nat<M>& rhs) const {
-  return *this + std::pair(rhs, Nat<1>{0});
-}
 
 ////////////
 // Output //

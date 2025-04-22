@@ -5,59 +5,69 @@
 #include "mango/int.h"
 #include "mango/ranged_int.h"
 
+#include "gtest/gtest.h"
+
 using namespace mango;
 
+#if 0
 constexpr Nat<3> x{5};
 constexpr Nat<64> y{77};
 constexpr Nat<0> zero;
 constexpr Nat<1000> big{x};
+#endif
 
-template <uint16_t N>
-void show(const char* msg, Nat<N> const& v) {
-  std::cout << "[" << msg << "] ";
-  std::cout << "Nat<" << N << ">{" << v << "}";
-  std::cout << std::endl;
+
+TEST(Nat, DefaultConstructor) {
+  Nat<0> n;
+  EXPECT_EQ(n.low, 0);
+  EXPECT_EQ(n.WIDTH, 0);
+  EXPECT_EQ(n.SLACK, 64);
+  EXPECT_EQ(n.MASK, 0);
 }
 
-template <uint16_t N>
-void show(const char* msg, UInt<N> const v) {
-  std::cout << "[" << msg << "] ";
-  std::cout << "UInt<" << N << ">{" << v << "}";
-  std::cout << std::endl;
+TEST(Nat, Constructor) {
+  {
+    Nat<2> n{5};
+    EXPECT_EQ(n.WIDTH, 2);
+    EXPECT_EQ(n.SLACK, 62);
+    EXPECT_EQ(n.MASK, 0x3);
+    EXPECT_EQ(n.high, Nat<0>{});
+    EXPECT_EQ(n.low, 1);
+  }
+
+  Nat<7> n{5};
+  EXPECT_EQ(n.WIDTH, 7);
+  EXPECT_EQ(n.SLACK, 57);
+  EXPECT_EQ(n.MASK, 0x7f);
+  EXPECT_EQ(n.high, Nat<0>{});
+  EXPECT_EQ(n.low, 5);
+
+  Nat<100> n2{17};
+  EXPECT_EQ(n2.low, 17);
+  EXPECT_EQ(n2.WIDTH, 100);
+  EXPECT_EQ(n2.SLACK, 0);
+  EXPECT_EQ(n2.MASK, ~uint64_t{0});
+  const auto h = n2.upper();
+  EXPECT_EQ(h.WIDTH, 36);
+  EXPECT_EQ(h.SLACK, 28);
+  EXPECT_EQ(h.MASK, uint64_t{0xfffffffff});
+  EXPECT_EQ(h.low, 0);
 }
 
-void show(const char* msg, const bool v) {
-  std::cout << "[" << msg << "] " << v << std::endl;
+TEST(Nat, Add) {
+  Nat<4> n{5};
+  Nat<6> m{7};
+  auto r = n + m;
+  EXPECT_EQ(r.WIDTH, 7);
+  EXPECT_EQ(r.low, 12);
 }
 
-template <uint16_t A, Int<A> MIN, uint16_t B, Int<B> MAX>
-void show(const char* msg, const RangedInt<A, MIN, B, MAX>& v) {
-  std::cout << "[" << msg << "] " << v << std::endl;
-}
 
-#define SHOW(x) show(#x, x)
 
-int main() {
+
+
+int main(int argc, char **argv) {
   printf("hello\n");
-  SHOW(x);
-  SHOW(y);
-  SHOW(zero);
-  SHOW(big);
-  SHOW(Nat<500>{x});
-  SHOW(big.succ());
-  SHOW(x + y);
-  SHOW(~Nat<100>{});
-  SHOW(UInt(x));
-  // SHOW(-UInt(x));
-  SHOW(x == y);
-  SHOW(x == big);
-
-  SHOW(UInt(x));
-  // SHOW(UInt(x) + UInt(y));
-
-  // std::cout << zero + x << std::endl;
-  // std::cout << zero + x << std::endl;
-  // std::cout << x + y << " " << (x + y).WIDTH << std::endl;
-
-  return 0;
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }

@@ -13,7 +13,7 @@ struct UInt {
   constexpr UInt<N, ~MAX, ~MIN> operator~() const { return {~abs}; }
 
   template <uint16_t M, Nat<M> MIN2, Nat<M> MAX2>
-  constexpr const auto operator+(const UInt<M, MIN2, MAX2>& rhs) const {
+  constexpr auto operator+(const UInt<M, MIN2, MAX2>& rhs) const {
     return UInt<max(N, M) + 1, MIN + MIN2, MAX + MAX2>{abs + rhs.abs};
   }
 };

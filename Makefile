@@ -11,6 +11,9 @@ all: .build
 format:
 	clang-format -style=Google -Werror -i *.cc mango/*.h
 
+test: all
+	(cd build && ./mango)
+
 clean:
 	rm -rf build .build
 
