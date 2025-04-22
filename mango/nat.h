@@ -12,18 +12,15 @@
 
 namespace mango {
 
-template <uint16_t N>
-struct Nat;
+template <uint16_t N> struct Nat;
 
-template <uint16_t N>
-struct Int;
+template <uint16_t N> struct Int;
 
 ////////////
 // Nat<0> //
 ////////////
 
-template <>
-struct Nat<0> {
+template <> struct Nat<0> {
   constexpr static uint16_t WIDTH = 0;
   constexpr static uint16_t SLACK = 64;
   constexpr static uint16_t MASK = 0;
@@ -31,11 +28,9 @@ struct Nat<0> {
 
   constexpr Nat() {}
 
-  template <uint16_t M>
-  explicit constexpr Nat(Nat<M> const&) {}
+  template <uint16_t M> explicit constexpr Nat(Nat<M> const &) {}
 
-  template <uint16_t M>
-  constexpr operator const Nat<M>() const {
+  template <uint16_t M> constexpr operator const Nat<M>() const {
     return Nat<M>{};
   }
 
@@ -44,30 +39,30 @@ struct Nat<0> {
   constexpr const Nat<1> succ() const;
 
   template <uint16_t M>
-  constexpr const Nat<M> operator+(const Nat<M>& rhs) const {
+  constexpr const Nat<M> operator+(const Nat<M> &rhs) const {
     return rhs;
   }
 
   constexpr const Nat<0> operator~() const { return *this; }
 
-  template <uint16_t M>
-  constexpr bool operator==(const Nat<M>& rhs) const {
-    if constexpr (M == 0) return true;
-    if (rhs.low != 0) return false;
+  template <uint16_t M> constexpr bool operator==(const Nat<M> &rhs) const {
+    if constexpr (M == 0)
+      return true;
+    if (rhs.low != 0)
+      return false;
     return *this == rhs.upper();
   }
 
   template <uint16_t M>
-  constexpr const Nat<M + 1> add_with_carry(const Nat<M>& rhs,
-                                            const Nat<1>& carry_in) const;
+  constexpr const Nat<M + 1> add_with_carry(const Nat<M> &rhs,
+                                            const Nat<1> &carry_in) const;
 };
 
 ////////////
 // Nat<N> //
 ////////////
 
-template <uint16_t N>
-struct Nat {
+template <uint16_t N> struct Nat {
   const uint64_t low;
   const Nat<safe_sub(N, 64)> high;
   constexpr static uint16_t WIDTH = N;
@@ -79,11 +74,11 @@ struct Nat {
 
   constexpr Nat(const uint64_t v = 0) : low(v << SLACK >> SLACK) {}
 
-  constexpr Nat(const Nat<safe_sub(N, 64)>& high, const uint64_t low)
+  constexpr Nat(const Nat<safe_sub(N, 64)> &high, const uint64_t low)
       : low(low << SLACK >> SLACK), high(high) {}
 
   template <uint16_t M>
-  explicit constexpr Nat(Nat<M> const& src)
+  explicit constexpr Nat(Nat<M> const &src)
       : low(src.low << SLACK >> SLACK), high(src.upper()) {}
 
   constexpr const Int<N> pred() const;
@@ -99,7 +94,7 @@ struct Nat {
   constexpr const Nat<N> operator~() const { return {~high, ~low}; }
 
   template <uint16_t M>
-  constexpr Cmp cmp(const Nat<M>& rhs, const Cmp prev = Cmp::EQ) const {
+  constexpr Cmp cmp(const Nat<M> &rhs, const Cmp prev = Cmp::EQ) const {
     if (low == rhs.low) {
       return high.cmp(rhs.upper(), prev);
     } else if (low > rhs.low) {
@@ -110,7 +105,7 @@ struct Nat {
   }
 
   template <uint16_t M>
-  constexpr const Nat<N> sub_with_borrow(const Nat<M>& rhs,
+  constexpr const Nat<N> sub_with_borrow(const Nat<M> &rhs,
                                          const bool borrow) const {
     return {high.sub_with_borrow(rhs.upper(),
                                  borrow ? low <= rhs.low : low < rhs.low),
@@ -118,8 +113,8 @@ struct Nat {
   }
 
   template <uint16_t M>
-  constexpr const Nat<max(N, M) + 1> add_with_carry(
-      const Nat<M>& rhs, const Nat<1>& carry_in) const noexcept {
+  constexpr const Nat<max(N, M) + 1>
+  add_with_carry(const Nat<M> &rhs, const Nat<1> &carry_in) const noexcept {
     if constexpr (M > N) {
       return rhs.add_with_carry(*this, carry_in);
     } else {
@@ -145,14 +140,15 @@ struct Nat {
   }
 
   template <uint16_t M>
-  constexpr const Nat<max(N, M) + 1> operator+(
-      const Nat<M>& rhs) const noexcept {
+  constexpr const Nat<max(N, M) + 1>
+  operator+(const Nat<M> &rhs) const noexcept {
     return add_with_carry(rhs, Nat<1>{0});
   }
 
   template <uint16_t M>
-  constexpr bool operator==(const Nat<M>& rhs) const noexcept {
-    if (low != rhs.low) return false;
+  constexpr bool operator==(const Nat<M> &rhs) const noexcept {
+    if (low != rhs.low)
+      return false;
     return high == rhs.upper();
   }
 };
@@ -160,8 +156,8 @@ struct Nat {
 constexpr const Nat<1> Nat<0>::succ() const { return Nat<1>{1}; }
 
 template <uint16_t M>
-constexpr const Nat<M + 1> Nat<0>::add_with_carry(
-    const Nat<M>& rhs, const Nat<1>& carry_in) const {
+constexpr const Nat<M + 1>
+Nat<0>::add_with_carry(const Nat<M> &rhs, const Nat<1> &carry_in) const {
   if (carry_in.low == 0) {
     return Nat<M + 1>{rhs};
   } else {
@@ -174,7 +170,7 @@ constexpr const Nat<M + 1> Nat<0>::add_with_carry(
 ////////////
 
 template <uint16_t N>
-inline std::ostream& operator<<(std::ostream& os, const Nat<N>& nat) {
+inline std::ostream &operator<<(std::ostream &os, const Nat<N> &nat) {
   if constexpr (N > 64) {
     os << nat.high << ":";
   }
@@ -182,4 +178,4 @@ inline std::ostream& operator<<(std::ostream& os, const Nat<N>& nat) {
   return os;
 }
 
-}  // namespace mango
+} // namespace mango

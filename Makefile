@@ -5,6 +5,9 @@ compile : Makefile .build
 test: Makefile .build
 	(cd build && meson test)
 
+format: Makefile .build
+	(cd build && ninja clang-format)
+
 .build: Makefile .setup
 	meson build --reconfigure
 	touch .build

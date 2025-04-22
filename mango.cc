@@ -2,9 +2,9 @@
 
 #include <iostream>
 
-#include "gtest/gtest.h"
 #include "mango/int.h"
 #include "mango/ranged_int.h"
+#include "gtest/gtest.h"
 
 using namespace mango;
 
