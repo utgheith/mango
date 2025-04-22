@@ -69,7 +69,7 @@ TEST(Nat, Factory) {
   EXPECT_EQ(nat(0x1, 0x2), nat(UINT64_C(0x0000000100000002)));
 }
 
-TEST(Int, DefaultConstructor) {
+TEST(UInt, DefaultConstructor) {
   UInt<0> i{};
   EXPECT_EQ(i.WIDTH, 0);
   EXPECT_EQ(i.MIN_VALUE, nat());
@@ -81,6 +81,17 @@ TEST(Int, DefaultConstructor) {
   EXPECT_EQ(i3.MIN_VALUE, nat());
   EXPECT_EQ(i3.MAX_VALUE, nat(7));
   EXPECT_EQ(i3.abs.low, 5);
+}
+
+TEST(UInt, Add) {
+  UInt<4> i{5};
+  UInt<6> j{7};
+  auto r = i + j;
+  EXPECT_EQ(r.WIDTH, 7);
+  EXPECT_EQ(r.MIN_VALUE, nat());
+  EXPECT_EQ(r.MAX_VALUE, i.MAX_VALUE + j.MAX_VALUE);
+  EXPECT_EQ(r.abs.low, 12);
+
 }
 
 int main(int argc, char **argv) {
