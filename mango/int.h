@@ -8,7 +8,7 @@ template <uint16_t N, Nat<N> MIN = Nat<N>{}, Nat<N> MAX = ~Nat<N>{}>
 struct UInt {
   const Nat<N> abs;
 
-  constexpr UInt(Nat<N> abs = MIN) : abs(abs) {}
+  constexpr UInt(Nat<N> abs_ = MIN) : abs(abs_) {}
 
   constexpr UInt<N, ~MAX, ~MIN> operator~() const { return {~abs}; }
 

@@ -1,16 +1,19 @@
+BUILD_TYPE ?= release  # Options: release, debug, plain, ...
+BUILD_DIR = build/${BUILD_TYPE}
 
-compile : Makefile .build
-	(cd build && meson compile)
 
-test: Makefile .build
-	(cd build && meson test)
+compile : Makefile .build.${BUILD_TYPE}
+	(cd ${BUILD_DIR} && meson compile)
 
-format: Makefile .build
-	(cd build && ninja clang-format)
+test: Makefile .build.${BUILD_TYPE}
+	(cd ${BUILD_DIR} && meson test)
 
-.build: Makefile .setup
-	meson build --reconfigure
-	touch .build
+format: Makefile .build.${BUILD_TYPE}
+	(cd ${BUILD_DIR} && ninja clang-format)
+
+.build.${BUILD_TYPE}: Makefile .setup
+	meson setup --reconfigure --buildtype ${BUILD_TYPE} --werror ${BUILD_DIR} .
+	touch .build.${BUILD_TYPE}
 
 .setup: Makefile
 	-mkdir -p subprojects
@@ -18,6 +21,6 @@ format: Makefile .build
 	-touch .setup
 
 clean:
-	rm -rf .build build
+	rm -rf build .build.*
 
 

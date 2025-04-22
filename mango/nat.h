@@ -24,7 +24,8 @@ template <> struct Nat<0> {
   constexpr static uint16_t WIDTH = 0;
   constexpr static uint16_t SLACK = 64;
   constexpr static uint16_t MASK = 0;
-  constexpr static uint64_t low = 0;
+  const uint64_t low = 0; // TODO: could be `static constexpr` but
+                          // C++ doesn't have 0 sized structs anyway
 
   constexpr Nat() {}
 
@@ -72,10 +73,10 @@ template <uint16_t N> struct Nat {
 
   constexpr const Nat<safe_sub(N, 64)> upper() const { return high; }
 
-  constexpr Nat(const uint64_t v = 0) : low(v << SLACK >> SLACK) {}
+  constexpr Nat(const uint64_t v = 0) : low(v << SLACK >> SLACK), high{} {}
 
-  constexpr Nat(const Nat<safe_sub(N, 64)> &high, const uint64_t low)
-      : low(low << SLACK >> SLACK), high(high) {}
+  constexpr Nat(const Nat<safe_sub(N, 64)> &high_, const uint64_t low_)
+      : low(low_ << SLACK >> SLACK), high(high_) {}
 
   template <uint16_t M>
   explicit constexpr Nat(Nat<M> const &src)
@@ -125,7 +126,6 @@ template <uint16_t N> struct Nat {
       auto new_low = low + rhs.low + carry_in.low;
       if constexpr (M >= 64) {
         static_assert(~MASK == uint64_t(0));
-        auto new_low = low + rhs.low + carry_in.low;
         if (new_low < low) {
           // carry
           auto new_high = high.add_with_carry(rhs.upper(), Nat<1>{1});

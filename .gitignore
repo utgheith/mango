@@ -1,8 +1,6 @@
-.build
+.build.*
 /build
 .setup
 /subprojects/
-*.d
-*.o
 /.vscode
 
