@@ -3,7 +3,6 @@
 #include <iostream>
 
 #include "mango/int.h"
-#include "mango/ranged_int.h"
 #include "mango/nat.h"
 #include "gtest/gtest.h"
 
@@ -65,7 +64,7 @@ TEST(Nat, Factory) {
   auto x = nat();
   EXPECT_EQ(x.WIDTH, 0);
   EXPECT_EQ(nat(7).WIDTH, 32);
-  EXPECT_EQ(nat(7,8).WIDTH, 64);
+  EXPECT_EQ(nat(7, 8).WIDTH, 64);
   EXPECT_EQ(nat(0x1, 0x2), nat(UINT64_C(0x0000000100000002)));
 }
 
@@ -91,7 +90,6 @@ TEST(UInt, Add) {
   EXPECT_EQ(r.MIN_VALUE, nat());
   EXPECT_EQ(r.MAX_VALUE, i.MAX_VALUE + j.MAX_VALUE);
   EXPECT_EQ(r.abs.low, 12);
-
 }
 
 int main(int argc, char **argv) {

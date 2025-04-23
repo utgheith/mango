@@ -58,11 +58,9 @@ template <> struct Nat<0> {
   constexpr const Nat<M + 1> add_with_carry(const Nat<M> &rhs,
                                             const Nat<1> &carry_in) const;
 
-  template <uint16_t M>
-  constexpr const Nat<M> concat(const Nat<M> &rhs) const {
+  template <uint16_t M> constexpr const Nat<M> concat(const Nat<M> &rhs) const {
     return rhs;
   }
-
 };
 
 ////////////
@@ -152,7 +150,7 @@ template <uint16_t N> struct Nat {
   }
 
   template <uint16_t M>
-  constexpr const Nat<N+M> concat(const Nat<M> &rhs) const noexcept {
+  constexpr const Nat<N + M> concat(const Nat<M> &rhs) const noexcept {
     if constexpr (M == 0) {
       return *this;
     } else if constexpr (M == 64) {
@@ -161,10 +159,10 @@ template <uint16_t N> struct Nat {
       return {concat(rhs.upper()), rhs.low};
     } else {
       const uint64_t new_low = (low << M) | rhs.low;
-      if constexpr ((N+M) <= 64) {
-        return Nat<M+N>{new_low};
+      if constexpr ((N + M) <= 64) {
+        return Nat<M + N>{new_low};
       } else {
-        const Nat<N-64+M> new_high = high.concat(Nat<M>{low >> (64-M)});
+        const Nat<N - 64 + M> new_high = high.concat(Nat<M>{low >> (64 - M)});
         return {new_high, new_low};
       }
     }
@@ -194,28 +192,13 @@ Nat<0>::add_with_carry(const Nat<M> &rhs, const Nat<1> &carry_in) const {
 // factory //
 /////////////
 
-constexpr Nat<0> nat() {
-  return Nat<0>{};
+constexpr const Nat<0> nat() { return Nat<0>{}; }
+
+template <typename T> constexpr const auto nat(T v) {
+  return Nat<sizeof(T) * 8>{static_cast<uint64_t>(v)};
 }
 
-constexpr Nat<32> nat(int32_t v) {
-  return Nat<32>{uint64_t(v)};
-}
-
-constexpr Nat<32> nat(uint32_t v) {
-  return Nat<32>{uint64_t(v)};
-}
-
-constexpr Nat<64> nat(int64_t v) {
-  return Nat<64>{uint64_t(v)};
-}
-
-constexpr Nat<64> nat(uint64_t v) {
-  return Nat<64>{v};
-}
-
-template <typename T, typename...Ts>
-constexpr auto nat(T v, Ts...vs) {
+template <typename T, typename... Ts> constexpr const auto nat(T v, Ts... vs) {
   return nat(v).concat(nat(vs...));
 }
 

@@ -13,13 +13,15 @@ struct UInt {
 
   constexpr UInt(Nat<N> abs_ = MIN) : abs(abs_) {}
 
-  constexpr UInt<N, ~MAX, ~MIN> operator~() const { return {~abs}; }
+  constexpr const UInt<N, ~MAX, ~MIN> operator~() const { return {~abs}; }
 
   template <uint16_t M, Nat<M> MIN2, Nat<M> MAX2>
-  constexpr auto operator+(const UInt<M, MIN2, MAX2> &rhs) const {
+  constexpr const auto operator+(const UInt<M, MIN2, MAX2> &rhs) const {
     return UInt<max(N, M) + 1, MIN + MIN2, MAX + MAX2>{abs + rhs.abs};
   }
 };
+
+constexpr UInt<0> uint() { return UInt<0>{}; }
 
 }; // namespace mango
 
