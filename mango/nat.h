@@ -14,7 +14,7 @@ namespace mango {
 
 template <uint16_t N> struct Nat;
 
-template <uint16_t N> struct Int;
+template <uint16_t N> struct Sat;
 
 ////////////
 // Nat<0> //
@@ -86,7 +86,7 @@ template <uint16_t N> struct Nat {
   explicit constexpr Nat(Nat<M> const &src)
       : low(src.low << SLACK >> SLACK), high(src.upper()) {}
 
-  constexpr const Int<N> pred() const;
+  constexpr const Sat<N> pred() const;
 
   constexpr const Nat<N + 1> succ() const {
     if (low == MASK) {
@@ -110,12 +110,8 @@ template <uint16_t N> struct Nat {
   }
 
   template <uint16_t M>
-  constexpr const Nat<N> sub_with_borrow(const Nat<M> &rhs,
-                                         const bool borrow) const {
-    return {high.sub_with_borrow(rhs.upper(),
-                                 borrow ? low <= rhs.low : low < rhs.low),
-            (low - (borrow ? 1 : 0)) - rhs.low};
-  }
+  constexpr const Sat<max(N, M)>
+  sub_with_borrow(const Nat<M> &rhs, const bool borrow) const noexcept;
 
   template <uint16_t M>
   constexpr const Nat<max(N, M) + 1>
@@ -188,6 +184,11 @@ Nat<0>::add_with_carry(const Nat<M> &rhs, const Nat<1> &carry_in) const {
   }
 }
 
+template <uint16_t N>
+template <uint16_t M>
+constexpr const Sat<max(N, M)>
+Nat<N>::sub_with_borrow(const Nat<M> &rhs, const bool borrow) const noexcept {}
+
 /////////////
 // factory //
 /////////////
@@ -201,6 +202,37 @@ template <typename T> constexpr const auto nat(T v) {
 template <typename T, typename... Ts> constexpr const auto nat(T v, Ts... vs) {
   return nat(v).concat(nat(vs...));
 }
+
+/////////
+// Sat //
+/////////
+
+template <uint16_t N> struct Sat {
+
+  const Nat<N> abs;
+  const bool is_negative = false;
+
+  constexpr Sat(const Nat<N> &abs_, bool is_negative_ = false)
+      : abs(abs_), is_negative(is_negative_) {}
+
+  constexpr const Sat<N> operator-() const noexcept {
+    return Sat<N>{abs, !is_negative};
+  }
+
+  template <uint16_t M>
+  constexpr const Sat<max(N, N) + 1>
+  operator+(const Sat<M> &rhs) const noexcept {
+    if (is_negative == rhs.is_negative) {
+      return {abs + rhs.abs, is_negative};
+    } else {
+      if (is_negative) {
+        return rhs.abs - abs;
+      } else {
+        return abs - rhs.abs;
+      }
+    }
+  }
+};
 
 ////////////
 // Output //
