@@ -17,7 +17,7 @@ constexpr Nat<1000> big{x};
 
 TEST(Nat, DefaultConstructor) {
   Nat<0> n;
-  EXPECT_EQ(n.low, 0);
+  EXPECT_EQ(n.get_low(), 0);
   EXPECT_EQ(n.WIDTH, 0);
   EXPECT_EQ(n.SLACK, 64);
   EXPECT_EQ(n.MASK, 0);
@@ -45,7 +45,7 @@ TEST(Nat, Constructor) {
   EXPECT_EQ(n2.WIDTH, 100);
   EXPECT_EQ(n2.SLACK, 0);
   EXPECT_EQ(n2.MASK, ~uint64_t{0});
-  const auto h = n2.upper();
+  const auto h = n2.get_high();
   EXPECT_EQ(h.WIDTH, 36);
   EXPECT_EQ(h.SLACK, 28);
   EXPECT_EQ(h.MASK, uint64_t{0xfffffffff});
@@ -73,13 +73,13 @@ TEST(UInt, DefaultConstructor) {
   EXPECT_EQ(i.WIDTH, 0);
   EXPECT_EQ(i.MIN_VALUE, nat());
   EXPECT_EQ(i.MAX_VALUE, nat());
-  EXPECT_EQ(i.abs.low, 0);
+  EXPECT_EQ(i.abs.get_low(), 0);
 
   UInt<3> i3{5};
   EXPECT_EQ(i3.WIDTH, 3);
   EXPECT_EQ(i3.MIN_VALUE, nat());
   EXPECT_EQ(i3.MAX_VALUE, nat(7));
-  EXPECT_EQ(i3.abs.low, 5);
+  EXPECT_EQ(i3.abs.get_low(), 5);
 }
 
 TEST(UInt, Add) {
