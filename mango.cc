@@ -5,6 +5,7 @@
 #include "mango/int.h"
 #include "mango/nat.h"
 #include "gtest/gtest.h"
+#include "mango/ct/nat.h"
 
 using namespace mango;
 
@@ -90,6 +91,32 @@ TEST(UInt, Add) {
   EXPECT_EQ(r.MIN_VALUE, nat());
   EXPECT_EQ(r.MAX_VALUE, i.MAX_VALUE + j.MAX_VALUE);
   EXPECT_EQ(r.abs.low, 12);
+}
+
+constexpr ct::Nat<> zero{};
+constexpr ct::Nat<0> z{};
+constexpr ct::Nat<0,0> zz{};
+
+TEST(Pat, IsZero) {
+  EXPECT_TRUE(zero.is_zero());
+  EXPECT_TRUE(z.is_zero());
+  EXPECT_TRUE(zz.is_zero());
+  EXPECT_EQ(zero, z);
+  EXPECT_EQ(z, zz);
+  EXPECT_EQ(z.succ(), zz.succ());
+  EXPECT_FALSE(zero.succ().is_zero());
+  EXPECT_FALSE(z.succ().is_zero());
+  EXPECT_FALSE(zz.succ().is_zero());
+  EXPECT_TRUE(zero.succ().succ() > zero);
+  EXPECT_TRUE(z.succ().succ() > z);
+  EXPECT_TRUE(zz.succ().succ() > zz);
+  EXPECT_FALSE(ct::Nat<1>{}.is_zero());
+
+  auto x = ct::Nat<~uint64_t(0)>{};
+  auto y = x.succ();
+  std::cout << x << " " << y << std::endl;
+
+  EXPECT_TRUE(x < y);
 }
 
 int main(int argc, char **argv) {
