@@ -2,10 +2,10 @@
 
 #include <iostream>
 
+#include "mango/ct/nat.h"
 #include "mango/int.h"
 #include "mango/nat.h"
 #include "gtest/gtest.h"
-#include "mango/ct/nat.h"
 
 using namespace mango;
 
@@ -95,7 +95,7 @@ TEST(UInt, Add) {
 
 constexpr ct::Nat<> zero{};
 constexpr ct::Nat<0> z{};
-constexpr ct::Nat<0,0> zz{};
+constexpr ct::Nat<0, 0> zz{};
 
 TEST(Pat, IsZero) {
   EXPECT_TRUE(zero.is_zero());

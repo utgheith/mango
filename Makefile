@@ -3,22 +3,22 @@ BUILD_DIR = build/${BUILD_TYPE}
 
 all : compile
 
-build_files: meson.build Makefile;
+BUILD_FILES = meson.build Makefile
 
-compile : build_files .build.${BUILD_TYPE}
+compile : ${BUILD_FILES} .build.${BUILD_TYPE}
 	(cd ${BUILD_DIR} && meson compile)
 
-test: build_files .build.${BUILD_TYPE}
+test: ${BUILD_FILES} .build.${BUILD_TYPE}
 	(cd ${BUILD_DIR} && meson test)
 
-format: build_files .build.${BUILD_TYPE}
+format: ${BUILD_FILES} .build.${BUILD_TYPE}
 	(cd ${BUILD_DIR} && ninja clang-format)
 
-.build.${BUILD_TYPE}: build_files .setup
+.build.${BUILD_TYPE}: ${BUILD_FILES} .setup
 	meson setup --reconfigure --buildtype ${BUILD_TYPE} --werror ${BUILD_DIR} .
 	touch .build.${BUILD_TYPE}
 
-.setup: build_files
+.setup: ${BUILD_FILES}
 	-mkdir -p subprojects
 	-meson wrap install gtest
 	-touch .setup
