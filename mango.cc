@@ -114,9 +114,9 @@ TEST(Pat, IsZero) {
 
   auto x = ct::Nat<~uint64_t(0)>{};
   auto y = x.succ();
-  std::cout << x << " " << y << std::endl;
 
   EXPECT_TRUE(x < y);
+  EXPECT_EQ(y, (ct::Nat<0,1>{}));
 }
 
 int main(int argc, char **argv) {

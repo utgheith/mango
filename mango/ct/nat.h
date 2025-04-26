@@ -9,7 +9,7 @@ template <uint64_t... Vs> struct Nat;
 /* special case: not empty */
 /***************************/
 
-template <uint64_t Head, uint64_t... Tail> struct Nat<Head, Tail...> {
+template <uint64_t... Tail, uint64_t Head> struct Nat<Head, Tail...> {
 
   constexpr static uint64_t low = Head;
 
