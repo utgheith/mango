@@ -118,7 +118,7 @@ TEST(Nat, IsZero) {
   EXPECT_TRUE(x < y);
   EXPECT_EQ(y, (ct::Nat<0, 1>{}));
 
-  EXPECT_EQ(-x, (ct::Int<true, ~uint64_t(0)>{}));
+  EXPECT_EQ(-x, (ct::Neg<~uint64_t(0)>{}));
 }
 
 int main(int argc, char **argv) {

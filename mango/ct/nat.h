@@ -115,41 +115,24 @@ template <> struct Nat<> {
 
 ///////////////////////////////////////////////////////////////////////////
 
-template <bool is_negative, uint64_t... Vs> struct Int {
+template <uint64_t... Vs> struct Neg {
 
   constexpr const Nat<Vs...> abs() const noexcept { return {}; }
 
-  constexpr const Int<!is_negative, Vs...> operator-() const noexcept {
-    return {};
-  }
+  constexpr const Nat<Vs...> operator-() const noexcept { return {}; }
 
-  template <bool is_negative2, uint64_t... Vs2>
-  constexpr Cmp cmp(const Int<is_negative2, Vs2...> &rhs,
-                    const Cmp prev = Cmp::EQ) const noexcept {
-    if constexpr (is_negative && !is_negative2) {
-      return Cmp::LT;
-    } else if constexpr (!is_negative && is_negative2) {
-      return Cmp::GT;
-    } else if constexpr (is_negative) {
-      static_assert(is_negative2);
-      return abs().cmp(rhs.abs(), prev);
-    } else {
-      return rhs.abs().cmp(abs(), prev);
-    }
+  template <uint64_t... Vs2>
+  constexpr Cmp cmp(const Neg<Vs2...> &rhs) const noexcept {
+    return rhs.abs().cmp(abs());
   }
 
   template <uint64_t... Vs2>
   constexpr Cmp cmp(const Nat<Vs2...> &rhs) const noexcept {
-    if constexpr (is_negative) {
-      return Cmp::LT;
-    } else {
-      return abs().cmp(rhs);
-    }
+    return Cmp::LT;
   }
 
-  template <bool is_negative2, uint64_t... Vs2>
-  constexpr bool
-  operator==(const Int<is_negative2, Vs2...> &rhs) const noexcept {
+  template <typename Rhs>
+  constexpr bool operator==(const Rhs &rhs) const noexcept {
     return cmp(rhs) == Cmp::EQ;
   }
 };
@@ -157,7 +140,7 @@ template <bool is_negative, uint64_t... Vs> struct Int {
 ///////////////////////////////////////////////////////////////////////////////
 
 template <uint64_t... Vs>
-constexpr const Int<true, Vs...> operator-(const Nat<Vs...> &) noexcept {
+constexpr const Neg<Vs...> operator-(const Nat<Vs...> &) noexcept {
   return {};
 }
 
@@ -184,11 +167,7 @@ std::ostream &operator<<(std::ostream &os, const mango::ct::Nat<Vs...> &) {
 }
 
 template <bool is_negative, uint64_t... Vs>
-std::ostream &operator<<(std::ostream &os,
-                         const mango::ct::Int<is_negative, Vs...> &) {
-  if constexpr (is_negative) {
-    os << "-";
-  }
-  os << mango::ct::Nat<Vs...>{};
+std::ostream &operator<<(std::ostream &os, const mango::ct::Neg<Vs...> &) {
+  os << "-" << mango::ct::Nat<Vs...>{};
   return os;
 }
