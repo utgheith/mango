@@ -118,10 +118,20 @@ TEST(Nat, IsZero) {
   EXPECT_EQ(y, (ct::Nat<0, 1>{}));
 
   EXPECT_EQ(-x, (ct::Neg<~uint64_t(0)>{}));
+
+  EXPECT_EQ(z.bit_size(), 0);
+  EXPECT_EQ(zz.bit_size(), 0);
+  EXPECT_EQ(zero.bit_size(), 0);
+  EXPECT_EQ((ct::Nat<1, 0, 1>{}).bit_size(), 1 + 64 + 64);
 }
 
 int main(int argc, char **argv) {
   printf("hello\n");
   testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  auto out = RUN_ALL_TESTS();
+
+  std::cout << z << std::endl;
+  std::cout << ct::Neg<1, 0, 1>{} << std::endl;
+
+  return out;
 }

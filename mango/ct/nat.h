@@ -15,6 +15,16 @@ template <uint64_t... Tail, uint64_t Head> struct Nat<Head, Tail...> {
 
   constexpr const Nat<Tail...> high() const noexcept { return {}; }
 
+  constexpr uint64_t bit_size() const noexcept {
+    const auto t = high().bit_size();
+
+    if constexpr (t == 0) {
+      return 64 - __builtin_clzll(low);
+    } else {
+      return t + 64;
+    }
+  }
+
   constexpr bool is_zero() const noexcept {
     return Head == 0 && Nat<Tail...>{}.is_zero();
   }
@@ -38,9 +48,8 @@ template <uint64_t... Tail, uint64_t Head> struct Nat<Head, Tail...> {
     const auto new_low = low + rhs.low + (carry_in ? 1 : 0);
     const auto new_carry = (new_low < low) || (new_low < rhs.low);
 
-    return high()
-        .add_with_carry(rhs.high(), new_carry)
-        .template inject_right<new_low>();
+    auto new_high = high().add_with_carry(rhs.high(), new_carry);
+    return new_high.template inject_right<new_low>();
   }
 
   template <uint64_t... Rs>
@@ -85,6 +94,8 @@ template <> struct Nat<> {
   constexpr static uint64_t low = 0;
 
   constexpr const Nat<> high() const noexcept { return {}; }
+
+  constexpr uint64_t bit_size() const noexcept { return 0; }
 
   constexpr bool is_zero() const noexcept { return true; }
 
@@ -158,12 +169,12 @@ std::ostream &operator<<(std::ostream &os, const mango::ct::Nat<Vs...>) {
     } else {
       os << "_";
     }
-    os << std::format("{:x}", v);
+    os << std::format("{:016x}", v);
   }
   return os;
 }
 
-template <bool is_negative, uint64_t... Vs>
+template <uint64_t... Vs>
 std::ostream &operator<<(std::ostream &os, const mango::ct::Neg<Vs...>) {
   os << "-" << mango::ct::Nat<Vs...>{};
   return os;
