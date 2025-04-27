@@ -4,7 +4,6 @@ namespace mango::ct {
 
 // general case //
 template <uint64_t... Vs> struct Nat;
-template <bool is_negative, uint64_t... Vs> struct Int;
 
 /***************************/
 /* special case: not empty */
@@ -34,9 +33,8 @@ template <uint64_t... Tail, uint64_t Head> struct Nat<Head, Tail...> {
   }
 
   template <uint64_t... Rs>
-  constexpr auto
-  add_with_carry(const Nat<Rs...> &rhs,
-                 const bool carry_in = false) const noexcept {
+  constexpr auto add_with_carry(const Nat<Rs...> rhs,
+                                const bool carry_in = false) const noexcept {
     const auto new_low = low + rhs.low + (carry_in ? 1 : 0);
     const auto new_carry = (new_low < low) || (new_low < rhs.low);
 
@@ -46,7 +44,7 @@ template <uint64_t... Tail, uint64_t Head> struct Nat<Head, Tail...> {
   }
 
   template <uint64_t... Rs>
-  constexpr auto operator+(const Nat<Rs...> &rhs) const noexcept {
+  constexpr auto operator+(const Nat<Rs...> rhs) const noexcept {
     return add_with_carry(rhs, false);
   }
 
@@ -64,17 +62,17 @@ template <uint64_t... Tail, uint64_t Head> struct Nat<Head, Tail...> {
   }
 
   template <uint64_t... Rs>
-  constexpr bool operator==(const Nat<Rs...> &rhs) const noexcept {
+  constexpr bool operator==(const Nat<Rs...> rhs) const noexcept {
     return cmp(rhs) == Cmp::EQ;
   }
 
   template <uint64_t... Rs>
-  constexpr bool operator>(const Nat<Rs...> &rhs) const noexcept {
+  constexpr bool operator>(const Nat<Rs...> rhs) const noexcept {
     return cmp(rhs) == Cmp::GT;
   }
 
   template <uint64_t... Rs>
-  constexpr bool operator<(const Nat<Rs...> &rhs) const noexcept {
+  constexpr bool operator<(const Nat<Rs...> rhs) const noexcept {
     return cmp(rhs) == Cmp::LT;
   }
 };
@@ -93,7 +91,7 @@ template <> struct Nat<> {
   constexpr const Nat<1> succ() const noexcept { return {}; }
 
   template <uint64_t... Rs>
-  constexpr Cmp cmp(const Nat<Rs...> &rhs,
+  constexpr Cmp cmp(const Nat<Rs...> rhs,
                     const Cmp prev = Cmp::EQ) const noexcept {
     if (rhs.is_zero()) {
       return prev;
@@ -103,12 +101,12 @@ template <> struct Nat<> {
   }
 
   template <uint64_t... Rs>
-  constexpr bool operator==(const Nat<Rs...> &rhs) const noexcept {
+  constexpr bool operator==(const Nat<Rs...> rhs) const noexcept {
     return cmp(rhs) == Cmp::EQ;
   }
 
   template <uint64_t... Rs>
-  constexpr bool operator>(const Nat<Rs...> &rhs) const noexcept {
+  constexpr bool operator>(const Nat<Rs...> rhs) const noexcept {
     return cmp(rhs) == Cmp::GT;
   }
 };
@@ -122,17 +120,17 @@ template <uint64_t... Vs> struct Neg {
   constexpr const Nat<Vs...> operator-() const noexcept { return {}; }
 
   template <uint64_t... Vs2>
-  constexpr Cmp cmp(const Neg<Vs2...> &rhs) const noexcept {
+  constexpr Cmp cmp(const Neg<Vs2...> rhs) const noexcept {
     return rhs.abs().cmp(abs());
   }
 
   template <uint64_t... Vs2>
-  constexpr Cmp cmp(const Nat<Vs2...> &) const noexcept {
+  constexpr Cmp cmp(const Nat<Vs2...>) const noexcept {
     return Cmp::LT;
   }
 
   template <typename Rhs>
-  constexpr bool operator==(const Rhs &rhs) const noexcept {
+  constexpr bool operator==(const Rhs rhs) const noexcept {
     return cmp(rhs) == Cmp::EQ;
   }
 };
@@ -140,20 +138,19 @@ template <uint64_t... Vs> struct Neg {
 ///////////////////////////////////////////////////////////////////////////////
 
 template <uint64_t... Vs>
-constexpr const Neg<Vs...> operator-(const Nat<Vs...> &) noexcept {
+constexpr const Neg<Vs...> operator-(const Nat<Vs...>) noexcept {
   return {};
 }
 
 template <uint64_t... Vs, uint64_t... Rs>
-constexpr auto operator-(const Nat<Vs...> &lhs,
-                               const Nat<Rs...> &rhs) noexcept {
+constexpr auto operator-(const Nat<Vs...> lhs, const Nat<Rs...> rhs) noexcept {
   return lhs + (-rhs);
 }
 
 } // namespace mango::ct
 
 template <uint64_t... Vs>
-std::ostream &operator<<(std::ostream &os, const mango::ct::Nat<Vs...> &) {
+std::ostream &operator<<(std::ostream &os, const mango::ct::Nat<Vs...>) {
   bool first = true;
   for (const auto &v : {Vs...}) {
     if (first) {
@@ -167,7 +164,7 @@ std::ostream &operator<<(std::ostream &os, const mango::ct::Nat<Vs...> &) {
 }
 
 template <bool is_negative, uint64_t... Vs>
-std::ostream &operator<<(std::ostream &os, const mango::ct::Neg<Vs...> &) {
+std::ostream &operator<<(std::ostream &os, const mango::ct::Neg<Vs...>) {
   os << "-" << mango::ct::Nat<Vs...>{};
   return os;
 }
