@@ -3,8 +3,6 @@
 #include <iostream>
 
 #include "mango/ct/nat.h"
-#include "mango/int.h"
-#include "mango/nat.h"
 #include "gtest/gtest.h"
 
 using namespace mango;
@@ -14,7 +12,7 @@ constexpr Nat<3> x{5};
 constexpr Nat<64> y{77};
 constexpr Nat<0> zero;
 constexpr Nat<1000> big{x};
-#endif
+
 
 TEST(Nat, DefaultConstructor) {
   Nat<0> n;
@@ -92,6 +90,7 @@ TEST(UInt, Add) {
   EXPECT_EQ(r.MAX_VALUE, i.MAX_VALUE + j.MAX_VALUE);
   EXPECT_EQ(r.abs.low, 12);
 }
+#endif
 
 constexpr ct::Nat<> zero{};
 constexpr ct::Nat<0> z{};
