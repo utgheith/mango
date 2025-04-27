@@ -4,6 +4,7 @@ namespace mango::ct {
 
 // general case //
 template <uint64_t... Vs> struct Nat;
+template <bool is_negative, uint64_t... Vs> struct Int;
 
 /***************************/
 /* special case: not empty */
@@ -112,20 +113,82 @@ template <> struct Nat<> {
   }
 };
 
+///////////////////////////////////////////////////////////////////////////
+
+template <bool is_negative, uint64_t... Vs> struct Int {
+
+  constexpr const Nat<Vs...> abs() const noexcept { return {}; }
+
+  constexpr const Int<!is_negative, Vs...> operator-() const noexcept {
+    return {};
+  }
+
+  template <bool is_negative2, uint64_t... Vs2>
+  constexpr Cmp cmp(const Int<is_negative2, Vs2...> &rhs,
+                    const Cmp prev = Cmp::EQ) const noexcept {
+    if constexpr (is_negative && !is_negative2) {
+      return Cmp::LT;
+    } else if constexpr (!is_negative && is_negative2) {
+      return Cmp::GT;
+    } else if constexpr (is_negative) {
+      static_assert(is_negative2);
+      return abs().cmp(rhs.abs(), prev);
+    } else {
+      return rhs.abs().cmp(abs(), prev);
+    }
+  }
+
+  template <uint64_t... Vs2>
+  constexpr Cmp cmp(const Nat<Vs2...> &rhs) const noexcept {
+    if constexpr (is_negative) {
+      return Cmp::LT;
+    } else {
+      return abs().cmp(rhs);
+    }
+  }
+
+  template <bool is_negative2, uint64_t... Vs2>
+  constexpr bool
+  operator==(const Int<is_negative2, Vs2...> &rhs) const noexcept {
+    return cmp(rhs) == Cmp::EQ;
+  }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+template <uint64_t... Vs>
+constexpr const Int<true, Vs...> operator-(const Nat<Vs...> &) noexcept {
+  return {};
+}
+
+template <uint64_t... Vs, uint64_t... Rs>
+constexpr const auto operator-(const Nat<Vs...> &lhs,
+                               const Nat<Rs...> &rhs) noexcept {
+  return lhs + (-rhs);
+}
+
 } // namespace mango::ct
 
 template <uint64_t... Vs>
 std::ostream &operator<<(std::ostream &os, const mango::ct::Nat<Vs...> &) {
-  os << "ct::Nat<";
   bool first = true;
   for (const auto &v : {Vs...}) {
     if (first) {
       first = false;
     } else {
-      os << ", ";
+      os << "_";
     }
-    os << v;
+    os << std::format("{:x}", v);
   }
-  os << ">";
+  return os;
+}
+
+template <bool is_negative, uint64_t... Vs>
+std::ostream &operator<<(std::ostream &os,
+                         const mango::ct::Int<is_negative, Vs...> &) {
+  if constexpr (is_negative) {
+    os << "-";
+  }
+  os << mango::ct::Nat<Vs...>{};
   return os;
 }

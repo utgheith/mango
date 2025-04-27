@@ -97,7 +97,7 @@ constexpr ct::Nat<> zero{};
 constexpr ct::Nat<0> z{};
 constexpr ct::Nat<0, 0> zz{};
 
-TEST(Pat, IsZero) {
+TEST(Nat, IsZero) {
   EXPECT_TRUE(zero.is_zero());
   EXPECT_TRUE(z.is_zero());
   EXPECT_TRUE(zz.is_zero());
@@ -116,7 +116,9 @@ TEST(Pat, IsZero) {
   auto y = x.succ();
 
   EXPECT_TRUE(x < y);
-  EXPECT_EQ(y, (ct::Nat<0,1>{}));
+  EXPECT_EQ(y, (ct::Nat<0, 1>{}));
+
+  EXPECT_EQ(-x, (ct::Int<true, ~uint64_t(0)>{}));
 }
 
 int main(int argc, char **argv) {
