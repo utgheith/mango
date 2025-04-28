@@ -198,6 +198,9 @@ template <uint64_t... Vs> void one(const ct::Nat<Vs...> n) {
   ASSERT_EQ(n - n, ct::Nat<>{});
   ASSERT_EQ(n - n.succ(), ct::Neg<1>{});
   ASSERT_EQ(n + (-n), ct::Nat<>{});
+
+  auto neg = -n;
+  ASSERT_EQ(neg + n, ct::Nat<>{});
 }
 
 TEST(CtNat, DoubleNegation) {

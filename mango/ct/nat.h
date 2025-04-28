@@ -222,8 +222,33 @@ constexpr auto operator-(const Nat<Vs...> lhs, const Nat<Rs...> rhs) noexcept {
 }
 
 template <uint64_t... Vs, uint64_t... Rs>
+constexpr auto operator-(const Nat<Vs...> lhs, const Neg<Rs...> rhs) noexcept {
+  return lhs + rhs.abs();
+}
+
+template <uint64_t... Vs, uint64_t... Rs>
+constexpr auto operator-(const Neg<Vs...> lhs, const Nat<Rs...> rhs) noexcept {
+  return rhs + lhs.abs();
+}
+
+template <uint64_t... Vs, uint64_t... Rs>
+constexpr auto operator-(const Neg<Vs...> lhs, const Neg<Rs...> rhs) noexcept {
+  return rhs.abs() - lhs.abs();
+}
+
+template <uint64_t... Vs, uint64_t... Rs>
 constexpr auto operator+(const Nat<Vs...> lhs, const Neg<Rs...> rhs) noexcept {
   return lhs - rhs.abs();
+}
+
+template <uint64_t... Vs, uint64_t... Rs>
+constexpr auto operator+(const Neg<Vs...> lhs, const Nat<Rs...> rhs) noexcept {
+  return rhs - lhs.abs();
+}
+
+template <uint64_t... Vs, uint64_t... Rs>
+constexpr auto operator+(const Neg<Vs...> lhs, const Neg<Rs...> rhs) noexcept {
+  return -(lhs.abs() + rhs.abs());
 }
 
 } // namespace mango::ct
