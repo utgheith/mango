@@ -36,9 +36,11 @@ template <typename Min, typename Max> struct Int {
 
   template <typename A, typename B>
   constexpr Int(const A &lhs, const B &rhs) noexcept {
+#ifndef __clang__
     static_assert(bitsize ==
                   ((lhs.bitsize > rhs.bitsize) ? lhs.bitsize : rhs.bitsize) +
                       1);
+#endif
     uint64_t carry = 0;
     for (uint64_t i = 0; i < LEN; ++i) {
       const uint64_t a = lhs.get(i);

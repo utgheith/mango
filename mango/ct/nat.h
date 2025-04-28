@@ -19,7 +19,7 @@ template <uint64_t Low, uint64_t... High> struct Nat<Low, High...> {
     const auto t = Nat<High...>{}.bit_size();
 
     if (t == 0) {
-      return 64 - __builtin_clzll(low);
+      return 64 - clz(low);
     } else {
       return t + 64;
     }
