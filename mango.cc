@@ -125,13 +125,92 @@ TEST(Nat, IsZero) {
   EXPECT_EQ((ct::Nat<1, 0, 1>{}).bit_size(), 1 + 64 + 64);
 }
 
+TEST(CtNat, low) {
+  EXPECT_EQ((ct::Nat<1, 2, 3>{}).low, 1);
+  EXPECT_EQ(ct::Nat<5>{}.low, 5);
+  EXPECT_EQ(ct::Nat<>{}.low, 0);
+}
+
+TEST(CtNat, high) {
+  EXPECT_EQ((ct::Nat<1, 2, 3>{}).high(), (ct::Nat<2, 3>{}));
+  EXPECT_EQ((ct::Nat<5>{}).high(), ct::Nat<>{});
+  EXPECT_EQ((ct::Nat<>{}).high(), ct::Nat<>{});
+}
+
+TEST(CtNat, bit_size) {
+  EXPECT_EQ((ct::Nat<1, 2, 3>{}).bit_size(), 64 + 64 + 2);
+  EXPECT_EQ((ct::Nat<5>{}).bit_size(), 3);
+  EXPECT_EQ((ct::Nat<>{}).bit_size(), 0);
+}
+
+TEST(CtNat, is_zero) {
+  EXPECT_FALSE((ct::Nat<1, 2, 3>{}).is_zero());
+  EXPECT_FALSE((ct::Nat<5>{}).is_zero());
+  EXPECT_TRUE((ct::Nat<>{}).is_zero());
+}
+
+TEST(CtNat, inject_right) {
+  EXPECT_EQ((ct::Nat<1, 2, 3>{}).template inject_right<0>(),
+            (ct::Nat<0, 1, 2, 3>{}));
+  EXPECT_EQ((ct::Nat<5>{}).template inject_right<1>(), (ct::Nat<1, 5>{}));
+  EXPECT_EQ((ct::Nat<>{}).template inject_right<2>(), ct::Nat<2>{});
+}
+
+TEST(CtNat, succ) {
+  EXPECT_EQ((ct::Nat<1, 2, 3>{}).succ(), (ct::Nat<2, 2, 3>{}));
+  EXPECT_EQ((ct::Nat<5>{}).succ(), (ct::Nat<6>{}));
+  EXPECT_EQ((ct::Nat<>{}).succ(), ct::Nat<1>{});
+  EXPECT_EQ((ct::Nat<~uint64_t(0)>{}).succ(), (ct::Nat<0, 1>{}));
+  EXPECT_EQ((ct::Nat<~uint64_t(0), ~uint64_t(0), 1>{}).succ(),
+            (ct::Nat<0, 0, 2>{}));
+}
+
+TEST(CtNat, add) {
+  EXPECT_EQ((ct::Nat<1, 2, 3>{} + ct::Nat<4, 5>{}), (ct::Nat<5, 7, 3>{}));
+  EXPECT_EQ((ct::Nat<5>{} + ct::Nat<6>{}), (ct::Nat<11>{}));
+  EXPECT_EQ((ct::Nat<>{} + ct::Nat<1, 2>{}), (ct::Nat<1, 2>{}));
+  EXPECT_EQ((ct::Nat<1, 2, 3>{} + ct::Nat<0, 0, 1>{}), (ct::Nat<1, 2, 4>{}));
+  EXPECT_EQ(ct::Nat<~uint64_t(0)>{} + ct::Nat<1>{}, (ct::Nat<0, 1>{}));
+  EXPECT_EQ((ct::Nat<~uint64_t(0), ~uint64_t(0)>{}) + ct::Nat<5>{},
+            (ct::Nat<4, 0, 1>{}));
+}
+
+TEST(CtNat, Sub) {
+  EXPECT_EQ(ct::Nat<8>{} - ct::Nat<3>{}, ct::Nat<5>{});
+
+  const auto x = ct::Nat<1, 0, 1>{};
+  const auto y = ct::Nat<2, 0, 1>{};
+  EXPECT_EQ(y - x, ct::Nat<1>{});
+  EXPECT_EQ(x - y, ct::Neg<1>{});
+
+  // EXPECT_EQ(y+x, (ct::Nat<3, 0, 2>{}));
+  // EXPECT_EQ(y-x, (ct::Nat<1>{}));
+}
+
+constexpr auto nat_values = std::make_tuple(
+    ct::Nat<1, 2, 3>{}, ct::Nat<4, 5>{}, ct::Nat<5>{}, ct::Nat<6>{},
+    ct::Nat<>{}, ct::Nat<1, 2>{}, ct::Nat<0, 0, 1>{}, ct::Nat<~uint64_t(0)>{},
+    ct::Nat<~uint64_t(0), ~uint64_t(0), 1>{});
+
+template <uint64_t... Vs> void one(const ct::Nat<Vs...> n) {
+  ASSERT_EQ(n, -(-n));
+  ASSERT_EQ(n, n.succ() - ct::Nat<1>{});
+  ASSERT_EQ(n - n, ct::Nat<>{});
+  ASSERT_EQ(n - n.succ(), ct::Neg<1>{});
+  ASSERT_EQ(n + (-n), ct::Nat<>{});
+}
+
+TEST(CtNat, DoubleNegation) {
+
+  std::apply([](auto &&...args) { ((one(args)), ...); }, nat_values);
+}
+
 int main(int argc, char **argv) {
   printf("hello\n");
   testing::InitGoogleTest(&argc, argv);
   auto out = RUN_ALL_TESTS();
 
-  std::cout << z << std::endl;
-  std::cout << ct::Neg<1, 0, 1>{} << std::endl;
+  std::cout << ct::Nat<0, ~uint64_t(0), 1>{}.succ() << std::endl;
 
   return out;
 }

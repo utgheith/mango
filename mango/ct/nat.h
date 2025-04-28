@@ -3,22 +3,22 @@
 namespace mango::ct {
 
 // general case //
-template <uint64_t... Vs> struct Nat;
+template <uint64_t... Vs> struct Nat; // Little endian
 
 /***************************/
 /* special case: not empty */
 /***************************/
 
-template <uint64_t... Tail, uint64_t Head> struct Nat<Head, Tail...> {
+template <uint64_t Low, uint64_t... High> struct Nat<Low, High...> {
 
-  constexpr static uint64_t low = Head;
+  constexpr static uint64_t low = Low;
 
-  constexpr const Nat<Tail...> high() const noexcept { return {}; }
+  constexpr const Nat<High...> high() const noexcept { return {}; }
 
   constexpr uint64_t bit_size() const noexcept {
-    const auto t = high().bit_size();
+    const auto t = Nat<High...>{}.bit_size();
 
-    if constexpr (t == 0) {
+    if (t == 0) {
       return 64 - __builtin_clzll(low);
     } else {
       return t + 64;
@@ -26,36 +26,55 @@ template <uint64_t... Tail, uint64_t Head> struct Nat<Head, Tail...> {
   }
 
   constexpr bool is_zero() const noexcept {
-    return Head == 0 && Nat<Tail...>{}.is_zero();
+    return Low == 0 && Nat<High...>{}.is_zero();
   }
 
   template <uint64_t new_low>
-  constexpr const Nat<new_low, Head, Tail...> inject_right() const noexcept {
-    return Nat<new_low, Head, Tail...>{};
+  constexpr const Nat<new_low, Low, High...> inject_right() const noexcept {
+    return {};
   }
 
   constexpr auto succ() const noexcept {
     if constexpr (low == ~uint64_t{0}) {
-      return Nat<Tail...>{}.succ().template inject_right<0>();
+      return Nat<High...>{}.succ().template inject_right<0>();
     } else {
-      return Nat<low + 1, Tail...>{};
+      return Nat<low + 1, High...>{};
     }
   }
 
+  ///////////////// Nat<...>::addition ////////////////
+
   template <uint64_t... Rs>
-  constexpr auto add_with_carry(const Nat<Rs...> rhs,
-                                const bool carry_in = false) const noexcept {
-    const auto new_low = low + rhs.low + (carry_in ? 1 : 0);
+  constexpr auto add(const Nat<Rs...> rhs) const noexcept {
+    const auto new_low = low + rhs.low;
     const auto new_carry = (new_low < low) || (new_low < rhs.low);
 
-    auto new_high = high().add_with_carry(rhs.high(), new_carry);
-    return new_high.template inject_right<new_low>();
+    if constexpr (new_carry) {
+      const auto new_high = high().add(rhs.high().succ());
+      return new_high.template inject_right<new_low>();
+    } else {
+      const auto new_high = high().add(rhs.high());
+      return new_high.template inject_right<new_low>();
+    }
   }
 
+  ///////////////// Nat<...>::subtraction ////////////////
+
   template <uint64_t... Rs>
-  constexpr auto operator+(const Nat<Rs...> rhs) const noexcept {
-    return add_with_carry(rhs, false);
+  constexpr auto sub(const Nat<Rs...> rhs) const noexcept {
+    if constexpr (low < rhs.low) {
+      // need to borrow from the high part
+      const auto new_high = high().sub(rhs.high().succ());
+      return new_high
+          .template inject_right<(~uint64_t(0) - rhs.low) + 1 + low>();
+    } else {
+      // no borrow needed
+      const auto new_high = high().sub(rhs.high());
+      return new_high.template inject_right<low - rhs.low>();
+    }
   }
+
+  //////////////// Nat<...>::comparison ////////////////
 
   template <uint64_t... Rs>
   constexpr Cmp cmp(const Nat<Rs...> rhs,
@@ -100,6 +119,38 @@ template <> struct Nat<> {
   constexpr bool is_zero() const noexcept { return true; }
 
   constexpr const Nat<1> succ() const noexcept { return {}; }
+
+  template <uint64_t new_low>
+  constexpr const Nat<new_low> inject_right() const noexcept {
+    return {};
+  }
+
+  ///////////////// Nat<>::addition ////////////////
+
+  template <uint64_t... Rs>
+  constexpr auto add_with_carry(const Nat<Rs...> rhs) const noexcept {
+    if constexpr (rhs.is_zero()) {
+      return Nat<1>{};
+    } else {
+      return rhs.succ();
+    }
+  }
+
+  template <uint64_t... Rs>
+  constexpr auto add(const Nat<Rs...> rhs) const noexcept {
+    return rhs;
+  }
+
+  ///////////////// Nat<>::subtraction ////////////////
+
+  template <uint64_t... Rs>
+  constexpr Nat<> sub(const Nat<Rs...> rhs) const noexcept {
+    static_assert(rhs.is_zero(),
+                  "Cannot subtract from zero unless rhs is also zero");
+    return {};
+  }
+
+  ///////////////// Nat<>::comparison ////////////////
 
   template <uint64_t... Rs>
   constexpr Cmp cmp(const Nat<Rs...> rhs,
@@ -154,8 +205,25 @@ constexpr const Neg<Vs...> operator-(const Nat<Vs...>) noexcept {
 }
 
 template <uint64_t... Vs, uint64_t... Rs>
+constexpr auto operator+(const Nat<Vs...> lhs, const Nat<Rs...> rhs) noexcept {
+  return lhs.add(rhs);
+}
+
+template <uint64_t... Vs, uint64_t... Rs>
 constexpr auto operator-(const Nat<Vs...> lhs, const Nat<Rs...> rhs) noexcept {
-  return lhs + (-rhs);
+  const auto c = lhs.cmp(rhs);
+  if constexpr (c == Cmp::EQ) {
+    return Nat<>{};
+  } else if constexpr (c == Cmp::GT) {
+    return lhs.sub(rhs);
+  } else {
+    return -(rhs.sub(lhs));
+  }
+}
+
+template <uint64_t... Vs, uint64_t... Rs>
+constexpr auto operator+(const Nat<Vs...> lhs, const Neg<Rs...> rhs) noexcept {
+  return lhs - rhs.abs();
 }
 
 } // namespace mango::ct
