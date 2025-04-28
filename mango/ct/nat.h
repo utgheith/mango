@@ -219,6 +219,11 @@ template <uint64_t... Vs> struct Neg {
   }
 
   template <typename Rhs>
+  constexpr bool operator>=(const Rhs rhs) const noexcept {
+    return cmp(rhs) != Cmp::LT;
+  }
+
+  template <typename Rhs>
   constexpr bool operator<=(const Rhs rhs) const noexcept {
     return cmp(rhs) != Cmp::GT;
   }

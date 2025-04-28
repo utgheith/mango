@@ -21,9 +21,12 @@ template <typename Min, typename Max> struct Int {
     }
   }
 
-  template <typename T> constexpr Int(const T &value) noexcept {
+  template <typename T> constexpr Int(const T value) noexcept {
+    static_assert(value >= min);
+    static_assert(value <= max);
+    auto diff = value - min;
     for (uint64_t i = 0; i < LEN; ++i) {
-      state[i] = value.get(i);
+      state[i] = diff.get(i);
     }
   }
 
@@ -40,10 +43,9 @@ template <typename Min, typename Max> struct Int {
     for (uint64_t i = 0; i < LEN; ++i) {
       const uint64_t a = lhs.get(i);
       const uint64_t b = rhs.get(i);
-      const uint64_t c = __builtin_add_overflow(a, b, &carry);
-      // const uint64_t c = a + b + carry;;
-      // carry = ((c < a) || (c < b)) ? 1 : 0;
-      state[i] = c;
+      const uint64_t t = a + b + carry;
+      carry = ((t < a) || (t < b)) ? 1 : 0;
+      state[i] = t;
     }
   }
 
