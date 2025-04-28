@@ -13,7 +13,7 @@ template <uint64_t Low, uint64_t... High> struct Nat<Low, High...> {
 
   constexpr static uint64_t low = Low;
 
-  constexpr const Nat<High...> high() const noexcept { return {}; }
+  constexpr static const Nat<High...> high() noexcept { return {}; }
 
   constexpr uint64_t bit_size() const noexcept {
     const auto t = Nat<High...>{}.bit_size();
@@ -22,6 +22,14 @@ template <uint64_t Low, uint64_t... High> struct Nat<Low, High...> {
       return 64 - __builtin_clzll(low);
     } else {
       return t + 64;
+    }
+  }
+
+  constexpr static uint64_t get(uint64_t i) noexcept {
+    if (i == 0) {
+      return low;
+    } else {
+      return high().get(i - 1);
     }
   }
 
@@ -103,6 +111,16 @@ template <uint64_t Low, uint64_t... High> struct Nat<Low, High...> {
   constexpr bool operator<(const Nat<Rs...> rhs) const noexcept {
     return cmp(rhs) == Cmp::LT;
   }
+
+  template <uint64_t... Rs>
+  constexpr bool operator<=(const Nat<Rs...> rhs) const noexcept {
+    return cmp(rhs) != Cmp::GT;
+  }
+
+  template <uint64_t... Rs>
+  constexpr bool operator>=(const Nat<Rs...> rhs) const noexcept {
+    return cmp(rhs) != Cmp::LT;
+  }
 };
 
 /***********************/
@@ -112,7 +130,9 @@ template <uint64_t Low, uint64_t... High> struct Nat<Low, High...> {
 template <> struct Nat<> {
   constexpr static uint64_t low = 0;
 
-  constexpr const Nat<> high() const noexcept { return {}; }
+  constexpr static const Nat<> high() noexcept { return {}; }
+
+  constexpr static uint64_t get(const uint64_t) noexcept { return 0; }
 
   constexpr uint64_t bit_size() const noexcept { return 0; }
 
@@ -179,6 +199,8 @@ template <uint64_t... Vs> struct Neg {
 
   constexpr const Nat<Vs...> abs() const noexcept { return {}; }
 
+  constexpr uint64_t get(uint64_t i) const noexcept { return abs().get(i); }
+
   constexpr const Nat<Vs...> operator-() const noexcept { return {}; }
 
   template <uint64_t... Vs2>
@@ -194,6 +216,11 @@ template <uint64_t... Vs> struct Neg {
   template <typename Rhs>
   constexpr bool operator==(const Rhs rhs) const noexcept {
     return cmp(rhs) == Cmp::EQ;
+  }
+
+  template <typename Rhs>
+  constexpr bool operator<=(const Rhs rhs) const noexcept {
+    return cmp(rhs) != Cmp::GT;
   }
 };
 

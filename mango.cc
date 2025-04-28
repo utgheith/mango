@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "mango/ct/nat.h"
+#include "mango/rt/int.h"
 #include "gtest/gtest.h"
 
 using namespace mango;
@@ -203,9 +204,33 @@ template <uint64_t... Vs> void one(const ct::Nat<Vs...> n) {
   ASSERT_EQ(neg + n, ct::Nat<>{});
 }
 
-TEST(CtNat, DoubleNegation) {
+TEST(CtNat, Misc) {
 
   std::apply([](auto &&...args) { ((one(args)), ...); }, nat_values);
+}
+
+TEST(RtInt, Simple) {
+
+  constexpr auto i = rt::Int<ct::Nat<3>, ct::Nat<29>>{ct::Nat<17>{}};
+  EXPECT_EQ(i.min, ct::Nat<3>{});
+  EXPECT_EQ(i.max, ct::Nat<29>{});
+  EXPECT_EQ(i.range, ct::Nat<27>{});
+  EXPECT_EQ(i.bitsize, 5);
+  EXPECT_EQ(i.get(0), 14);
+
+  constexpr auto j = rt::Int<ct::Neg<4>, ct::Nat<2>>{ct::Neg<3>{}};
+  EXPECT_EQ(j.min, ct::Neg<4>{});
+  EXPECT_EQ(j.max, ct::Nat<2>{});
+  EXPECT_EQ(j.range, ct::Nat<7>{});
+  EXPECT_EQ(j.bitsize, 3);
+  EXPECT_EQ(j.get(0), 1);
+
+  const auto k = i + j;
+  EXPECT_EQ(k.min, ct::Neg<1>{});
+  EXPECT_EQ(k.max, ct::Nat<31>{});
+  EXPECT_EQ(k.range, ct::Nat<33>{});
+  EXPECT_EQ(k.bitsize, 6);
+  EXPECT_EQ(k.get(0), 15);
 }
 
 int main(int argc, char **argv) {
