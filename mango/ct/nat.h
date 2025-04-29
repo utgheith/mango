@@ -50,6 +50,25 @@ template <uint64_t Low, uint64_t... High> struct Nat<Low, High...> {
     }
   }
 
+  ///////////////// Nat<...>::shift_left ////////////////
+#if 0
+  template <uint64_t ...Rs>
+  constexpr auto operator<<(const Nat<Rs...> rhs) const noexcept {
+    if constexpr (rhs.is_zero()) {
+      return *this;
+    } else {
+      if constexpr (rhs >= Nat<64>{}) {
+        return Nat<0, Low, High...>{} << (rhs - Nat<64>{});
+      } else {
+        const auto new_low = Nat<Low>{} << rhs;
+        const auto new_carry = Nat<Low> >> (Nat<64>{} - rhs);
+        const auto new_high = (high() << shift) + new_carry;
+        return new_high.template inject_right<
+      }
+    }
+  }
+#endif
+
   ///////////////// Nat<...>::addition ////////////////
 
   template <uint64_t... Rs>
@@ -147,6 +166,7 @@ template <> struct Nat<> {
 
   ///////////////// Nat<>::addition ////////////////
 
+#if 0
   template <uint64_t... Rs>
   constexpr auto add_with_carry(const Nat<Rs...> rhs) const noexcept {
     if constexpr (rhs.is_zero()) {
@@ -155,6 +175,7 @@ template <> struct Nat<> {
       return rhs.succ();
     }
   }
+#endif
 
   template <uint64_t... Rs>
   constexpr auto add(const Nat<Rs...> rhs) const noexcept {

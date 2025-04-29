@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <iostream>
 #include <mango/ct/nat.h>
 
 namespace mango::rt {
@@ -58,4 +59,25 @@ template <typename Min, typename Max> struct Int {
     return OutType{*this, other};
   }
 };
+
+///////////////// UInt /////////////////////
+
+#if 0
+template <uint16_t N>
+using UInt = Int<mango::ct::Nat{}, (mango::ct::Nat<1>{} << mango::ct::Nat<N>{}) - mango::ct::Nat<1>{}>;
+
+template <uint16_t N>
+using SInt = Int<- (mango::ct::Nat<1>{} << (N - 1)), (mango::ct::Nat<1>{} << mango::ct::Nat<(N - 1)>{}) - mango::ct::Nat<1>{}>;
+#endif
+
+template <typename Min, typename Max>
+std::ostream &operator<<(std::ostream &os, const Int<Min, Max> &value) {
+  os << "Int<" << value.min << ", " << value.max << "> = ";
+  for (uint64_t i = 0; i < value.LEN; ++i) {
+    os << std::format("{:016X}", value.get(value.LEN - i));
+  }
+
+  return os;
+}
+
 } // namespace mango::rt
