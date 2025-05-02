@@ -16,9 +16,9 @@ template <uint64_t Low, uint64_t... High> struct Nat<Low, High...> {
 
   constexpr static uint64_t low = Low;
 
-  constexpr static const Nat<High...> high() noexcept { return {}; }
+  consteval static const Nat<High...> high() noexcept { return {}; }
 
-  constexpr uint64_t bit_size() const noexcept {
+  consteval uint64_t bit_size() const noexcept {
     const auto t = Nat<High...>{}.bit_size();
 
     if (t == 0) {
@@ -28,7 +28,7 @@ template <uint64_t Low, uint64_t... High> struct Nat<Low, High...> {
     }
   }
 
-  constexpr static uint64_t get(uint64_t i) noexcept {
+  consteval static uint64_t get(uint64_t i) noexcept {
     if (i == 0) {
       return low;
     } else {
@@ -36,16 +36,16 @@ template <uint64_t Low, uint64_t... High> struct Nat<Low, High...> {
     }
   }
 
-  constexpr bool is_zero() const noexcept {
+  consteval bool is_zero() const noexcept {
     return Low == 0 && Nat<High...>{}.is_zero();
   }
 
   template <uint64_t new_low>
-  constexpr const Nat<new_low, Low, High...> inject_right() const noexcept {
+  consteval const Nat<new_low, Low, High...> inject_right() const noexcept {
     return {};
   }
 
-  constexpr auto succ() const noexcept {
+  consteval auto succ() const noexcept {
     if constexpr (low == ~uint64_t{0}) {
       return Nat<High...>{}.succ().template inject_right<0>();
     } else {
@@ -56,7 +56,7 @@ template <uint64_t Low, uint64_t... High> struct Nat<Low, High...> {
   ///////////////// Nat<...>::shift_left ////////////////
 
   template <uint64_t... Rs>
-  constexpr auto operator<<(const Nat<Rs...> rhs) const noexcept {
+  consteval auto operator<<(const Nat<Rs...> rhs) const noexcept {
     if constexpr (rhs.is_zero()) {
       return *this;
     } else {
@@ -74,7 +74,7 @@ template <uint64_t Low, uint64_t... High> struct Nat<Low, High...> {
   ///////////////// Nat<...>::addition ////////////////
 
   template <uint64_t... Rs>
-  constexpr auto add(const Nat<Rs...> rhs) const noexcept {
+  consteval auto add(const Nat<Rs...> rhs) const noexcept {
     const auto new_low = low + rhs.low;
     const auto new_carry = (new_low < low) || (new_low < rhs.low);
 
@@ -90,7 +90,7 @@ template <uint64_t Low, uint64_t... High> struct Nat<Low, High...> {
   ///////////////// Nat<...>::subtraction ////////////////
 
   template <uint64_t... Rs>
-  constexpr auto sub(const Nat<Rs...> rhs) const noexcept {
+  consteval auto sub(const Nat<Rs...> rhs) const noexcept {
     if constexpr (low < rhs.low) {
       // need to borrow from the high part
       const auto new_high = high().sub(rhs.high().succ());
@@ -106,7 +106,7 @@ template <uint64_t Low, uint64_t... High> struct Nat<Low, High...> {
   //////////////// Nat<...>::comparison ////////////////
 
   template <uint64_t... Rs>
-  constexpr Cmp cmp(const Nat<Rs...> rhs,
+  consteval Cmp cmp(const Nat<Rs...> rhs,
                     const Cmp prev = Cmp::EQ) const noexcept {
 
     if constexpr (low == rhs.low) {
@@ -119,11 +119,11 @@ template <uint64_t Low, uint64_t... High> struct Nat<Low, High...> {
   }
 
   template <uint64_t... Rs>
-  constexpr Cmp cmp(const Neg<Rs...> rhs) const noexcept;
+  consteval Cmp cmp(const Neg<Rs...> rhs) const noexcept;
 
   template <typename T>
     requires std::is_integral_v<T>
-  constexpr Cmp cmp(const T rhs) const noexcept {
+  consteval Cmp cmp(const T rhs) const noexcept {
     if constexpr (std::is_signed_v<T>) {
       if (rhs < 0) {
         return Cmp::GT;
@@ -146,27 +146,27 @@ template <uint64_t Low, uint64_t... High> struct Nat<Low, High...> {
   }
 
   template <typename Rhs>
-  constexpr bool operator==(const Rhs &rhs) const noexcept {
+  consteval bool operator==(const Rhs rhs) const noexcept {
     return cmp(rhs) == Cmp::EQ;
   }
 
   template <typename Rhs>
-  constexpr bool operator>(const Rhs &rhs) const noexcept {
+  consteval bool operator>(const Rhs rhs) const noexcept {
     return cmp(rhs) == Cmp::GT;
   }
 
   template <typename Rhs>
-  constexpr bool operator<(const Rhs &rhs) const noexcept {
+  consteval bool operator<(const Rhs rhs) const noexcept {
     return cmp(rhs) == Cmp::LT;
   }
 
   template <typename Rhs>
-  constexpr bool operator<=(const Rhs &rhs) const noexcept {
+  consteval bool operator<=(const Rhs rhs) const noexcept {
     return cmp(rhs) != Cmp::GT;
   }
 
   template <typename Rhs>
-  constexpr bool operator>=(const Rhs &rhs) const noexcept {
+  consteval bool operator>=(const Rhs rhs) const noexcept {
     return cmp(rhs) != Cmp::LT;
   }
 };
@@ -178,39 +178,39 @@ template <uint64_t Low, uint64_t... High> struct Nat<Low, High...> {
 template <> struct Nat<> {
   constexpr static uint64_t low = 0;
 
-  constexpr static const Nat<> high() noexcept { return {}; }
+  consteval static const Nat<> high() noexcept { return {}; }
 
-  constexpr static uint64_t get(const uint64_t) noexcept { return 0; }
+  consteval static uint64_t get(const uint64_t) noexcept { return 0; }
 
-  constexpr uint64_t bit_size() const noexcept { return 0; }
+  consteval uint64_t bit_size() const noexcept { return 0; }
 
-  constexpr bool is_zero() const noexcept { return true; }
+  consteval bool is_zero() const noexcept { return true; }
 
-  constexpr const Nat<1> succ() const noexcept { return {}; }
+  consteval const Nat<1> succ() const noexcept { return {}; }
 
   template <uint64_t new_low>
-  constexpr const Nat<new_low> inject_right() const noexcept {
+  consteval const Nat<new_low> inject_right() const noexcept {
     return {};
   }
 
   ///////////////// Shift left /////////////////////
 
   template <uint64_t... Rs>
-  constexpr auto operator<<(const Nat<Rs...>) const noexcept {
+  consteval auto operator<<(const Nat<Rs...>) const noexcept {
     return *this;
   }
 
   ///////////////// Nat<>::addition ////////////////
 
   template <uint64_t... Rs>
-  constexpr auto add(const Nat<Rs...> rhs) const noexcept {
+  consteval auto add(const Nat<Rs...> rhs) const noexcept {
     return rhs;
   }
 
   ///////////////// Nat<>::subtraction ////////////////
 
   template <uint64_t... Rs>
-  constexpr Nat<> sub(const Nat<Rs...> rhs) const noexcept {
+  consteval Nat<> sub(const Nat<Rs...> rhs) const noexcept {
     static_assert(rhs.is_zero(),
                   "Cannot subtract from zero unless rhs is also zero");
     return {};
@@ -219,7 +219,7 @@ template <> struct Nat<> {
   ///////////////// Nat<>::comparison ////////////////
 
   template <uint64_t... Rs>
-  constexpr Cmp cmp(const Nat<Rs...> rhs,
+  consteval Cmp cmp(const Nat<Rs...> rhs,
                     const Cmp prev = Cmp::EQ) const noexcept {
     if (rhs.is_zero()) {
       return prev;
@@ -228,7 +228,7 @@ template <> struct Nat<> {
     }
   }
 
-  constexpr Cmp cmp(const uint64_t rhs) const noexcept {
+  consteval Cmp cmp(const uint64_t rhs) const noexcept {
     if (rhs == 0) {
       return Cmp::EQ;
     } else {
@@ -236,7 +236,7 @@ template <> struct Nat<> {
     }
   }
 
-  constexpr Cmp cmp(const int64_t rhs) const noexcept {
+  consteval Cmp cmp(const int64_t rhs) const noexcept {
     if (rhs < 0) {
       return Cmp::GT;
     } else {
@@ -245,17 +245,17 @@ template <> struct Nat<> {
   }
 
   template <uint64_t... Rs>
-  constexpr bool operator==(const Nat<Rs...> rhs) const noexcept {
+  consteval bool operator==(const Nat<Rs...> rhs) const noexcept {
     return cmp(rhs) == Cmp::EQ;
   }
 
   template <uint64_t... Rs>
-  constexpr bool operator<=(const Nat<Rs...> rhs) const noexcept {
+  consteval bool operator<=(const Nat<Rs...> rhs) const noexcept {
     return cmp(rhs) != Cmp::GT;
   }
 
   template <uint64_t... Rs>
-  constexpr bool operator>(const Nat<Rs...> rhs) const noexcept {
+  consteval bool operator>(const Nat<Rs...> rhs) const noexcept {
     return cmp(rhs) == Cmp::GT;
   }
 };
@@ -264,22 +264,22 @@ template <> struct Nat<> {
 
 template <uint64_t... Vs> struct Neg {
 
-  constexpr const Nat<Vs...> abs() const noexcept { return {}; }
+  consteval static const Nat<Vs...> abs() noexcept { return {}; }
 
-  constexpr uint64_t get(uint64_t i) const noexcept { return abs().get(i); }
+  consteval static uint64_t get(uint64_t i) noexcept { return abs().get(i); }
 
-  constexpr const Nat<Vs...> operator-() const noexcept { return {}; }
+  consteval const Nat<Vs...> operator-() const noexcept { return {}; }
 
-  constexpr bool is_zero() const noexcept { return abs().is_zero(); }
+  consteval static bool is_zero() noexcept { return abs().is_zero(); }
 
   template <uint64_t... Vs2>
-  constexpr Cmp cmp(const Neg<Vs2...> rhs) const noexcept {
+  consteval Cmp cmp(const Neg<Vs2...> rhs) const noexcept {
     return rhs.abs().cmp(abs());
   }
 
   template <uint64_t... Vs2>
-  constexpr Cmp cmp(const Nat<Vs2...> rhs) const noexcept {
-    if constexpr (is_zero() && rhs.is_zero()) {
+  consteval Cmp cmp(const Nat<Vs2...> rhs) const noexcept {
+    if constexpr (Neg<Vs...>{}.is_zero() && rhs.is_zero()) {
       return Cmp::EQ;
     } else {
       return Cmp::LT;
@@ -288,12 +288,12 @@ template <uint64_t... Vs> struct Neg {
 
   template <typename T>
     requires std::is_integral_v<T>
-  constexpr Cmp cmp(const T rhs) const noexcept {
+  consteval Cmp cmp(const T rhs) const noexcept {
     if constexpr (std::is_signed_v<T>) {
       assert(false);
       return Cmp::EQ;
     } else {
-      if (this.is_zero() && (rhs == 0)) {
+      if (Neg<Vs...>{}.is_zero() && (rhs == 0)) {
         return Cmp::EQ;
       } else {
         return Cmp::LT;
@@ -302,32 +302,32 @@ template <uint64_t... Vs> struct Neg {
   }
 
   template <typename Rhs>
-  constexpr bool operator==(const Rhs rhs) const noexcept {
+  consteval bool operator==(const Rhs rhs) const noexcept {
     return cmp(rhs) == Cmp::EQ;
   }
 
   template <typename Rhs>
-  constexpr bool operator>=(const Rhs rhs) const noexcept {
+  consteval bool operator>=(const Rhs rhs) const noexcept {
     return cmp(rhs) != Cmp::LT;
   }
 
   template <typename Rhs>
-  constexpr bool operator<=(const Rhs rhs) const noexcept {
+  consteval bool operator<=(const Rhs rhs) const noexcept {
     return cmp(rhs) != Cmp::GT;
   }
 };
 
 template <uint64_t Low, uint64_t... High>
 template <uint64_t... Rs>
-constexpr Cmp Nat<Low, High...>::cmp(const Neg<Rs...> rhs) const noexcept {
-  if constexpr (is_zero() && rhs.is_zero()) {
+consteval Cmp Nat<Low, High...>::cmp(const Neg<Rs...> rhs) const noexcept {
+  if constexpr (Nat<Low, High...>{}.is_zero() && rhs.is_zero()) {
     return Cmp::EQ;
   } else
     return Cmp::GT;
 }
 
 template <uint64_t... Vs>
-constexpr const Neg<Vs...> operator-(const Nat<Vs...>) noexcept {
+consteval const Neg<Vs...> operator-(const Nat<Vs...>) noexcept {
   return {};
 }
 
@@ -338,12 +338,12 @@ consteval auto operator+(const Nat<Vs...> lhs,
 }
 
 template <uint64_t... Vs, uint64_t... Rs>
-constexpr auto operator+(const Nat<Vs...> lhs, const Nat<Rs...> rhs) noexcept {
+consteval auto operator+(const Nat<Vs...> lhs, const Nat<Rs...> rhs) noexcept {
   return lhs.add(rhs);
 }
 
 template <uint64_t... Vs, uint64_t... Rs>
-constexpr auto operator-(const Nat<Vs...> lhs, const Nat<Rs...> rhs) noexcept {
+consteval auto operator-(const Nat<Vs...> lhs, const Nat<Rs...> rhs) noexcept {
   const auto c = lhs.cmp(rhs);
   if constexpr (c == Cmp::EQ) {
     return Nat<>{};
@@ -355,32 +355,32 @@ constexpr auto operator-(const Nat<Vs...> lhs, const Nat<Rs...> rhs) noexcept {
 }
 
 template <uint64_t... Vs, uint64_t... Rs>
-constexpr auto operator-(const Nat<Vs...> lhs, const Neg<Rs...> rhs) noexcept {
+consteval auto operator-(const Nat<Vs...> lhs, const Neg<Rs...> rhs) noexcept {
   return lhs + rhs.abs();
 }
 
 template <uint64_t... Vs, uint64_t... Rs>
-constexpr auto operator-(const Neg<Vs...> lhs, const Nat<Rs...> rhs) noexcept {
+consteval auto operator-(const Neg<Vs...> lhs, const Nat<Rs...> rhs) noexcept {
   return rhs + lhs.abs();
 }
 
 template <uint64_t... Vs, uint64_t... Rs>
-constexpr auto operator-(const Neg<Vs...> lhs, const Neg<Rs...> rhs) noexcept {
+consteval auto operator-(const Neg<Vs...> lhs, const Neg<Rs...> rhs) noexcept {
   return rhs.abs() - lhs.abs();
 }
 
 template <uint64_t... Vs, uint64_t... Rs>
-constexpr auto operator+(const Nat<Vs...> lhs, const Neg<Rs...> rhs) noexcept {
+consteval auto operator+(const Nat<Vs...> lhs, const Neg<Rs...> rhs) noexcept {
   return lhs - rhs.abs();
 }
 
 template <uint64_t... Vs, uint64_t... Rs>
-constexpr auto operator+(const Neg<Vs...> lhs, const Nat<Rs...> rhs) noexcept {
+consteval auto operator+(const Neg<Vs...> lhs, const Nat<Rs...> rhs) noexcept {
   return rhs - lhs.abs();
 }
 
 template <uint64_t... Vs, uint64_t... Rs>
-constexpr auto operator+(const Neg<Vs...> lhs, const Neg<Rs...> rhs) noexcept {
+consteval auto operator+(const Neg<Vs...> lhs, const Neg<Rs...> rhs) noexcept {
   return -(lhs.abs() + rhs.abs());
 }
 

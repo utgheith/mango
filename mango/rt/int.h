@@ -11,7 +11,7 @@ namespace mango::rt {
 template <typename Min, typename Max> struct Int {
   constexpr static Min min{};
   constexpr static Max max{};
-  static_assert(min <= max, "Min must be less than or equal to Max");
+  static_assert(Min{} <= Max{}, "Min must be less than or equal to Max");
   constexpr static auto range = max - min + ct::Nat<1>{};
   constexpr static uint64_t bitsize = range.bit_size();
   constexpr static uint64_t LEN =
