@@ -24,6 +24,10 @@ template <typename Min, typename Max> struct Int {
     }
   }
 
+  constexpr uint64_t get(const uint64_t i) const noexcept {
+    return (i < LEN) ? state[i] : 0;
+  }
+
   template <typename T> constexpr Int(const T value) noexcept {
     assert(min <= value);
     assert(max >= value);
@@ -33,16 +37,10 @@ template <typename Min, typename Max> struct Int {
     }
   }
 
-  constexpr uint64_t get(uint64_t i) const noexcept {
-    return (i < LEN) ? state[i] : 0;
-  }
-
   template <typename A, typename B>
   constexpr Int(const A &lhs, const B &rhs) noexcept {
-#ifndef __clang__
-    static_assert((bitsize - ((lhs.bitsize > rhs.bitsize) ? lhs.bitsize
-                                                          : rhs.bitsize)) < 2);
-#endif
+    static_assert(
+        (bitsize - ((A::bitsize > B::bitsize) ? A::bitsize : B::bitsize)) < 2);
     uint64_t carry = 0;
     for (uint64_t i = 0; i < LEN; ++i) {
       const uint64_t a = lhs.get(i);
@@ -61,19 +59,20 @@ template <typename Min, typename Max> struct Int {
   }
 };
 
-///////////////// UInt /////////////////////
+///////////////// UnsignedInt /////////////////////
 
 template <uint16_t N>
-using UInt = Int<mango::ct::Nat<>,
-                 decltype((mango::ct::Nat<1>{} << mango::ct::Nat<N>{}) -
-                          mango::ct::Nat<1>{})>;
+using UnsignedInt = Int<mango::ct::Nat<>,
+                        decltype((mango::ct::Nat<1>{} << mango::ct::Nat<N>{}) -
+                                 mango::ct::Nat<1>{})>;
 
 template <uint64_t N>
-struct SInt : Int<decltype(-(mango::ct::Nat<1>{} << mango::ct::Nat<(N - 1)>{})),
-                  decltype((mango::ct::Nat<1>{} << mango::ct::Nat<(N - 1)>{}) -
-                           mango::ct::Nat<1>{})> {};
+struct SignedInt
+    : Int<decltype(-(mango::ct::Nat<1>{} << mango::ct::Nat<(N - 1)>{})),
+          decltype((mango::ct::Nat<1>{} << mango::ct::Nat<(N - 1)>{}) -
+                   mango::ct::Nat<1>{})> {};
 
-template <> struct SInt<0> : Int<mango::ct::Nat<>, mango::ct::Nat<>> {};
+template <> struct SignedInt<0> : Int<mango::ct::Nat<>, mango::ct::Nat<>> {};
 
 template <typename Min, typename Max>
 std::ostream &operator<<(std::ostream &os, const Int<Min, Max> &value) {
@@ -87,7 +86,7 @@ std::ostream &operator<<(std::ostream &os, const Int<Min, Max> &value) {
 
 template <uint64_t... Vs>
 constexpr Int<mango::ct::Nat<>, mango::ct::Nat<Vs...>>
-make_uint(const mango::ct::Nat<Vs...> n) noexcept {
+UInt(const mango::ct::Nat<Vs...> n) noexcept {
   return Int<mango::ct::Nat<>, mango::ct::Nat<Vs...>>{n};
 }
 

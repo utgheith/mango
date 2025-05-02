@@ -246,30 +246,30 @@ TEST(CtNat, ShiftLeft) {
   EXPECT_TRUE(ct::Nat<1>{} << ct::Nat<64>{} == (ct::Nat<0, 1>{}));
 }
 
-TEST(UInt, Simple) {
-  const mango::rt::UInt<0> u0{};
+TEST(UnsignedInt, Simple) {
+  const mango::rt::UnsignedInt<0> u0{};
   EXPECT_TRUE(u0.min == ct::Nat<>{});
   EXPECT_TRUE(u0.max == ct::Nat<>{});
 
-  const mango::rt::UInt<3> u3{};
+  const mango::rt::UnsignedInt<3> u3{};
   EXPECT_TRUE(u3.min == ct::Nat<>{});
 
   EXPECT_TRUE(u3.max == ct::Nat<7>{});
 }
 
-TEST(SInt, Simple) {
+TEST(SignedInt, Simple) {
   using namespace mango::rt;
   using namespace mango::ct;
 
-  const SInt<0> s0{};
+  const SignedInt<0> s0{};
   EXPECT_TRUE(s0.min == Nat<>{});
   EXPECT_TRUE(s0.max == Nat<>{});
 
-  const SInt<3> s3{};
+  const SignedInt<3> s3{};
   EXPECT_TRUE(s3.min == Neg<4>{});
   EXPECT_TRUE(s3.max == Nat<3>{});
 
-  const auto v = make_uint(Nat<3>{}) + make_uint(Nat<7>{});
+  const auto v = UInt(Nat<3>{}) + UInt(Nat<7>{});
   EXPECT_TRUE(v.min == Nat<>{});
   EXPECT_TRUE(v.max == Nat<10>{});
   EXPECT_TRUE(v.get(0) == 10);
