@@ -56,6 +56,8 @@ template <typename T> constexpr T max(T a, T b) { return (a > b) ? a : b; }
 
 enum struct Cmp { LT = -1, EQ = 0, GT = 1 };
 
+constexpr Cmp inverse(const Cmp c) noexcept { return Cmp(-int(c)); }
+
 template <typename T1, typename T2>
   requires std::is_integral_v<T1> && std::is_integral_v<T2>
 constexpr Cmp cmp(const T1 v1, const T2 v2) {
@@ -72,13 +74,13 @@ constexpr Cmp cmp(const T1 v1, const T2 v2) {
       if constexpr (std::is_signed<T1>()) {
         if ((v1 < 0) || (T2(v1) < v2)) {
           return Cmp::LT;
-        } else if constexpr (v1 == v2) {
+        } else if (T2(v1) == v2) {
           return Cmp::EQ;
         } else {
           return Cmp::GT;
         }
       } else {
-        inverse(cmp(v2, v1));
+        return inverse(cmp(v2, v1));
       }
     }
   }

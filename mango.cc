@@ -97,6 +97,13 @@ constexpr ct::Nat<> zero{};
 constexpr ct::Nat<0> z{};
 constexpr ct::Nat<0, 0> zz{};
 
+TEST(mango, cmp) {
+  EXPECT_EQ(cmp(~int64_t(0), uint64_t(0)), Cmp::LT);
+  EXPECT_EQ(cmp(INT64_MIN, UINT64_MAX), Cmp::LT);
+  EXPECT_EQ(cmp(uint64_t(0), ~int64_t(0)), Cmp::GT);
+  EXPECT_EQ(cmp(UINT64_MAX, INT64_MIN), Cmp::GT);
+}
+
 TEST(Nat, IsZero) {
   EXPECT_TRUE(zero.is_zero());
   EXPECT_TRUE(z.is_zero());
