@@ -233,6 +233,43 @@ TEST(RtInt, Simple) {
   EXPECT_EQ(k.get(0), 15);
 }
 
+TEST(CtNat, ShiftLeft) {
+  EXPECT_EQ(ct::Nat<1>{} << ct::Nat<3>{}, ct::Nat<8>{});
+  EXPECT_EQ(ct::Nat<1>{} << ct::Nat<64>{}, (ct::Nat<0, 1>{}));
+}
+
+TEST(UInt, Simple) {
+  const mango::rt::UInt<0> u0{};
+  EXPECT_EQ(u0.min, ct::Nat<>{});
+  EXPECT_EQ(u0.max, ct::Nat<>{});
+
+  const mango::rt::UInt<3> u3{};
+  EXPECT_EQ(u3.min, ct::Nat<>{});
+
+  EXPECT_EQ(u3.max, ct::Nat<7>{});
+}
+
+TEST(SInt, Simple) {
+  using namespace mango::rt;
+  using namespace mango::ct;
+
+  const SInt<0> s0{};
+  EXPECT_EQ(s0.min, Nat<>{});
+  EXPECT_EQ(s0.max, Nat<>{});
+
+  const SInt<3> s3{};
+  EXPECT_EQ(s3.min, Neg<4>{});
+  EXPECT_EQ(s3.max, Nat<3>{});
+
+  const auto v = make_uint(Nat<3>{}) + make_uint(Nat<7>{});
+  EXPECT_EQ(v.min, Nat<>{});
+  EXPECT_EQ(v.max, Nat<10>{});
+  EXPECT_EQ(v.get(0), 10);
+
+  // const auto v = SInt<3>{3} + SInt<7>{2};
+  // EXPECT_EQ(v.min, Neg<67>{});
+}
+
 int main(int argc, char **argv) {
   printf("hello\n");
   testing::InitGoogleTest(&argc, argv);

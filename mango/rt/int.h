@@ -1,8 +1,10 @@
 #pragma once
 
+#include <cassert>
 #include <cstdint>
 #include <iostream>
 #include <mango/ct/nat.h>
+#include <type_traits>
 
 namespace mango::rt {
 
@@ -23,8 +25,8 @@ template <typename Min, typename Max> struct Int {
   }
 
   template <typename T> constexpr Int(const T value) noexcept {
-    static_assert(value >= min);
-    static_assert(value <= max);
+    assert(min <= value);
+    assert(max >= value);
     auto diff = value - min;
     for (uint64_t i = 0; i < LEN; ++i) {
       state[i] = diff.get(i);
@@ -38,9 +40,8 @@ template <typename Min, typename Max> struct Int {
   template <typename A, typename B>
   constexpr Int(const A &lhs, const B &rhs) noexcept {
 #ifndef __clang__
-    static_assert(bitsize ==
-                  ((lhs.bitsize > rhs.bitsize) ? lhs.bitsize : rhs.bitsize) +
-                      1);
+    static_assert((bitsize - ((lhs.bitsize > rhs.bitsize) ? lhs.bitsize
+                                                          : rhs.bitsize)) < 2);
 #endif
     uint64_t carry = 0;
     for (uint64_t i = 0; i < LEN; ++i) {
@@ -62,13 +63,17 @@ template <typename Min, typename Max> struct Int {
 
 ///////////////// UInt /////////////////////
 
-#if 0
 template <uint16_t N>
-using UInt = Int<mango::ct::Nat{}, (mango::ct::Nat<1>{} << mango::ct::Nat<N>{}) - mango::ct::Nat<1>{}>;
+using UInt = Int<mango::ct::Nat<>,
+                 decltype((mango::ct::Nat<1>{} << mango::ct::Nat<N>{}) -
+                          mango::ct::Nat<1>{})>;
 
-template <uint16_t N>
-using SInt = Int<- (mango::ct::Nat<1>{} << (N - 1)), (mango::ct::Nat<1>{} << mango::ct::Nat<(N - 1)>{}) - mango::ct::Nat<1>{}>;
-#endif
+template <uint64_t N>
+struct SInt : Int<decltype(-(mango::ct::Nat<1>{} << mango::ct::Nat<(N - 1)>{})),
+                  decltype((mango::ct::Nat<1>{} << mango::ct::Nat<(N - 1)>{}) -
+                           mango::ct::Nat<1>{})> {};
+
+template <> struct SInt<0> : Int<mango::ct::Nat<>, mango::ct::Nat<>> {};
 
 template <typename Min, typename Max>
 std::ostream &operator<<(std::ostream &os, const Int<Min, Max> &value) {
@@ -80,4 +85,17 @@ std::ostream &operator<<(std::ostream &os, const Int<Min, Max> &value) {
   return os;
 }
 
+template <uint64_t... Vs>
+constexpr Int<mango::ct::Nat<>, mango::ct::Nat<Vs...>>
+make_uint(const mango::ct::Nat<Vs...> n) noexcept {
+  return Int<mango::ct::Nat<>, mango::ct::Nat<Vs...>>{n};
+}
+
 } // namespace mango::rt
+
+template <typename T, typename MIN, typename MAX>
+  requires std::is_integral_v<T>
+constexpr auto operator-(const T lhs,
+                         const mango::rt::Int<MIN, MAX> &rhs) noexcept {
+  return -(rhs - lhs);
+}
