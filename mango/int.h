@@ -24,7 +24,7 @@ template <typename Min, typename Max> struct Int {
     }
   }
 
-  constexpr uint64_t get(const uint64_t i) const noexcept {
+  constexpr uint64_t get(uint64_t i) const noexcept {
     return (i < LEN) ? state[i] : 0;
   }
 
@@ -74,7 +74,7 @@ template <typename Min, typename Max>
 std::ostream &operator<<(std::ostream &os, const Int<Min, Max> &value) {
   os << "Int<" << value.min << ", " << value.max << "> = ";
   for (uint64_t i = 0; i < value.LEN; ++i) {
-    os << std::format("{:016X}", value.get(value.LEN - i));
+    os << value.get(value.LEN - i);
   }
 
   return os;
@@ -88,7 +88,7 @@ constexpr Int<Nat<>, Nat<Vs...>> UInt(const Nat<Vs...> n) noexcept {
 } // namespace mango
 
 template <typename T, typename MIN, typename MAX>
-  requires std::is_integral_v<T>
+requires std::is_integral_v<T>
 constexpr auto operator-(const T lhs,
                          const mango::Int<MIN, MAX> &rhs) noexcept {
   return -(rhs - lhs);

@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <cstdio>
-#include <format>
+//#include <format>
 #include <iostream>
 #include <string>
 #include <type_traits>
@@ -39,7 +39,7 @@ template <uint16_t N> struct BitsState {
   constexpr uint64_t get_low() const noexcept { return low; }
   constexpr auto get_high() const noexcept { return high; }
 
-  constexpr uint64_t get(const uint64_t i) const noexcept {
+  constexpr uint64_t get(uint64_t i) const noexcept {
     if (i == 0) {
       return low & MASK;
     } else {
@@ -63,7 +63,7 @@ template <> struct BitsState<0> {
 
   template <uint16_t M> constexpr BitsState(const BitsState<M> &) {}
 
-  constexpr uint64_t get(const uint64_t) const noexcept { return 0; }
+  constexpr uint64_t get(uint64_t) const noexcept { return 0; }
   constexpr uint64_t get_low() const noexcept { return 0; }
   constexpr const Bits<0> get_high() const noexcept;
 };
@@ -171,7 +171,7 @@ inline std::ostream &operator<<(std::ostream &os, const mango::Bits<N> &bits) {
   if constexpr (N > 64) {
     os << bits.get_high() << ":";
   }
-  os << std::format("{:x}", bits.get_low());
+  os << bits.get_low();
   return os;
 }
 

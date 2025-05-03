@@ -28,7 +28,7 @@ template <uint64_t Low, uint64_t... High> struct Nat<Low, High...> {
     }
   }
 
-  consteval static uint64_t get(uint64_t i) noexcept {
+  constexpr static uint64_t get(uint64_t i) noexcept {
     if (i == 0) {
       return low;
     } else {
@@ -122,7 +122,7 @@ template <uint64_t Low, uint64_t... High> struct Nat<Low, High...> {
   consteval Cmp cmp(const Neg<Rs...> rhs) const noexcept;
 
   template <typename T>
-    requires std::is_integral_v<T>
+  requires std::is_integral_v<T>
   consteval Cmp cmp(const T rhs) const noexcept {
     if constexpr (std::is_signed_v<T>) {
       if (rhs < 0) {
@@ -180,7 +180,7 @@ template <> struct Nat<> {
 
   consteval static const Nat<> high() noexcept { return {}; }
 
-  consteval static uint64_t get(const uint64_t) noexcept { return 0; }
+  constexpr static uint64_t get(uint64_t) noexcept { return 0; }
 
   consteval uint64_t bit_size() const noexcept { return 0; }
 
@@ -266,7 +266,7 @@ template <uint64_t... Vs> struct Neg {
 
   consteval static const Nat<Vs...> abs() noexcept { return {}; }
 
-  consteval static uint64_t get(uint64_t i) noexcept { return abs().get(i); }
+  constexpr static uint64_t get(uint64_t i) noexcept { return abs().get(i); }
 
   consteval const Nat<Vs...> operator-() const noexcept { return {}; }
 
@@ -287,7 +287,7 @@ template <uint64_t... Vs> struct Neg {
   }
 
   template <typename T>
-    requires std::is_integral_v<T>
+  requires std::is_integral_v<T>
   consteval Cmp cmp(const T rhs) const noexcept {
     if constexpr (std::is_signed_v<T>) {
       assert(false);
@@ -395,7 +395,7 @@ std::ostream &operator<<(std::ostream &os, const mango::Nat<Vs...>) {
     } else {
       os << "_";
     }
-    os << std::format("{:016x}", v);
+    os << v;
   }
   return os;
 }
