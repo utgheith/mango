@@ -8,7 +8,7 @@
 #include <type_traits>
 #include <utility>
 
-#include "mango.h"
+#include "common.h"
 
 namespace mango {
 
@@ -37,7 +37,7 @@ template <uint16_t N> struct BitsState {
       : low(rhs.get_low()), high(rhs.get_high()) {}
 
   constexpr uint64_t get_low() const noexcept { return low; }
-  constexpr const auto get_high() const noexcept { return high; }
+  constexpr auto get_high() const noexcept { return high; }
 
   constexpr uint64_t get(const uint64_t i) const noexcept {
     if (i == 0) {
@@ -152,11 +152,11 @@ constexpr BitsState<N>::BitsState(const uint64_t v) noexcept
 
 constexpr Bits<0> bits() { return Bits<0>{}; }
 
-template <typename T> constexpr const auto bits(T v) {
+template <typename T> constexpr auto bits(T v) {
   return Bits<sizeof(T) * 8>{static_cast<uint64_t>(v)};
 }
 
-template <typename T, typename... Ts> constexpr const auto bits(T v, Ts... vs) {
+template <typename T, typename... Ts> constexpr auto bits(T v, Ts... vs) {
   return bits(v).concat(bits(vs...));
 }
 
