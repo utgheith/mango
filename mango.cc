@@ -2,45 +2,55 @@
 
 #include <iostream>
 
+#include "mango/bits.h"
 #include "mango/int.h"
 #include "mango/nat.h"
 #include "gtest/gtest.h"
 
 using namespace mango;
 
-#if 0
-constexpr Nat<3> x{5};
-constexpr Nat<64> y{77};
-constexpr Nat<0> zero;
-constexpr Nat<1000> big{x};
+TEST(Bits, Simple) {
+  const Bits<3> x{5};
+  const Bits<64> y{77};
+  const Bits<1000> big{x};
 
+  EXPECT_EQ(x.low, 5);
+  EXPECT_EQ(y.low, 77);
+  EXPECT_EQ(big.low, 5);
 
-TEST(Nat, DefaultConstructor) {
-  Nat<0> n;
+  EXPECT_EQ(big.WIDTH, 1000);
+
+  const auto c = x.concat(x);
+  EXPECT_EQ(c.WIDTH, 6);
+  EXPECT_EQ(c.low, 0b101101);
+}
+
+TEST(Bits, DefaultConstructor) {
+  Bits<0> n;
   EXPECT_EQ(n.get_low(), 0);
   EXPECT_EQ(n.WIDTH, 0);
   EXPECT_EQ(n.SLACK, 64);
   EXPECT_EQ(n.MASK, 0);
 }
 
-TEST(Nat, Constructor) {
+TEST(Bits, Constructor) {
   {
-    Nat<2> n{5};
+    Bits<2> n{5};
     EXPECT_EQ(n.WIDTH, 2);
     EXPECT_EQ(n.SLACK, 62);
     EXPECT_EQ(n.MASK, 0x3);
-    EXPECT_EQ(n.high, Nat<0>{});
+    EXPECT_EQ(n.high, Bits<0>{});
     EXPECT_EQ(n.low, 1);
   }
 
-  Nat<7> n{5};
+  Bits<7> n{5};
   EXPECT_EQ(n.WIDTH, 7);
   EXPECT_EQ(n.SLACK, 57);
   EXPECT_EQ(n.MASK, 0x7f);
-  EXPECT_EQ(n.high, Nat<0>{});
+  EXPECT_EQ(n.high, Bits<0>{});
   EXPECT_EQ(n.low, 5);
 
-  Nat<100> n2{17};
+  Bits<100> n2{17};
   EXPECT_EQ(n2.low, 17);
   EXPECT_EQ(n2.WIDTH, 100);
   EXPECT_EQ(n2.SLACK, 0);
@@ -51,6 +61,8 @@ TEST(Nat, Constructor) {
   EXPECT_EQ(h.MASK, uint64_t{0xfffffffff});
   EXPECT_EQ(h.low, 0);
 }
+
+#if 0
 
 TEST(Nat, Add) {
   Nat<4> n{5};

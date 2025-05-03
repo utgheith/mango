@@ -14,9 +14,9 @@ namespace mango {
 
 template <uint16_t N> struct Bits;
 
-//////////////
+///////////////
 // BitsState //
-//////////////
+///////////////
 
 template <uint16_t N> struct BitsState {
   constexpr static uint16_t WIDTH = N;
@@ -32,12 +32,25 @@ template <uint16_t N> struct BitsState {
   constexpr BitsState(const Bits<safe_sub(N, 64)> &high_, const uint64_t low_)
       : low(low_ & MASK), high(high_) {}
 
-  constexpr uint64_t get_low() const noexcept { return low; }
+  template <uint16_t M>
+  constexpr BitsState(const BitsState<M> &rhs)
+      : low(rhs.get_low()), high(rhs.get_high()) {}
 
-  constexpr const Bits<safe_sub(N, 64)> get_high() const noexcept {
-    return high;
+  constexpr uint64_t get_low() const noexcept { return low; }
+  constexpr const auto get_high() const noexcept { return high; }
+
+  constexpr uint64_t get(const uint64_t i) const noexcept {
+    if (i == 0) {
+      return low & MASK;
+    } else {
+      high.get(i - 1);
+    }
   }
 };
+
+//////////////////
+// BitsState<0> //
+//////////////////
 
 template <> struct BitsState<0> {
   constexpr static uint16_t WIDTH = 0;
@@ -48,13 +61,16 @@ template <> struct BitsState<0> {
 
   constexpr BitsState(const Bits<0> &, const uint64_t) noexcept {}
 
+  template <uint16_t M> constexpr BitsState(const BitsState<M> &) {}
+
+  constexpr uint64_t get(const uint64_t) const noexcept { return 0; }
   constexpr uint64_t get_low() const noexcept { return 0; }
   constexpr const Bits<0> get_high() const noexcept;
 };
 
-////////////
+/////////////
 // Bits<N> //
-////////////
+/////////////
 
 template <uint16_t N> struct Bits : public BitsState<N> {
   constexpr static uint16_t WIDTH = BitsState<N>::WIDTH;
@@ -65,6 +81,9 @@ template <uint16_t N> struct Bits : public BitsState<N> {
 
   constexpr Bits(const Bits<safe_sub(N, 64)> &high_, const uint64_t low_)
       : BitsState<N>(high_, low_) {}
+
+  template <uint16_t M>
+  constexpr Bits(const Bits<M> &rhs) : BitsState<N>(rhs) {}
 
   // comparison operators
 
@@ -86,16 +105,6 @@ template <uint16_t N> struct Bits : public BitsState<N> {
   template <uint16_t M>
   constexpr bool operator==(const Bits<M> &rhs) const noexcept {
     return cmp(rhs) == Cmp::EQ;
-  }
-
-  // arithmetic operators
-
-  constexpr const Bits<N + 1> succ() const {
-    if (this->get_low() == MASK) {
-      return {Bits<safe_sub(N + 1, 64)>{this->get_high().succ()}, 0};
-    } else {
-      return {Bits<safe_sub(N + 1, 64)>{this->get_high()}, this->get_low() + 1};
-    }
   }
 
   constexpr const Bits<N> operator~() const {
@@ -151,20 +160,20 @@ template <typename T, typename... Ts> constexpr const auto bits(T v, Ts... vs) {
   return bits(v).concat(bits(vs...));
 }
 
+} // namespace mango
+
 ////////////
 // Output //
 ////////////
 
 template <uint16_t N>
-inline std::ostream &operator<<(std::ostream &os, const Bits<N> &bits) {
+inline std::ostream &operator<<(std::ostream &os, const mango::Bits<N> &bits) {
   if constexpr (N > 64) {
     os << bits.get_high() << ":";
   }
   os << std::format("{:x}", bits.get_low());
   return os;
 }
-
-} // namespace mango
 
 // comparison
 
