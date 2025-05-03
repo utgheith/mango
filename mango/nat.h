@@ -2,7 +2,7 @@
 
 #include <cassert>
 
-namespace mango::ct {
+namespace mango {
 
 // general case //
 template <uint64_t... Vs> struct Nat; // Little endian
@@ -384,10 +384,10 @@ consteval auto operator+(const Neg<Vs...> lhs, const Neg<Rs...> rhs) noexcept {
   return -(lhs.abs() + rhs.abs());
 }
 
-} // namespace mango::ct
+} // namespace mango
 
 template <uint64_t... Vs>
-std::ostream &operator<<(std::ostream &os, const mango::ct::Nat<Vs...>) {
+std::ostream &operator<<(std::ostream &os, const mango::Nat<Vs...>) {
   bool first = true;
   for (const auto &v : {Vs...}) {
     if (first) {
@@ -401,7 +401,7 @@ std::ostream &operator<<(std::ostream &os, const mango::ct::Nat<Vs...>) {
 }
 
 template <uint64_t... Vs>
-std::ostream &operator<<(std::ostream &os, const mango::ct::Neg<Vs...>) {
-  os << "-" << mango::ct::Nat<Vs...>{};
+std::ostream &operator<<(std::ostream &os, const mango::Neg<Vs...>) {
+  os << "-" << mango::Nat<Vs...>{};
   return os;
 }

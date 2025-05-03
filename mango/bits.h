@@ -14,7 +14,6 @@ namespace mango {
 
 template <uint16_t N> struct Bits;
 
-
 //////////////
 // BitsState //
 //////////////

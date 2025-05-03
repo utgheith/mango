@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include "mango/ct/nat.h"
-#include "mango/rt/int.h"
+#include "mango/int.h"
+#include "mango/nat.h"
 #include "gtest/gtest.h"
 
 using namespace mango;
@@ -93,9 +93,9 @@ TEST(UInt, Add) {
 }
 #endif
 
-constexpr ct::Nat<> zero{};
-constexpr ct::Nat<0> z{};
-constexpr ct::Nat<0, 0> zz{};
+constexpr Nat<> zero{};
+constexpr Nat<0> z{};
+constexpr Nat<0, 0> zz{};
 
 TEST(mango, cmp) {
   EXPECT_EQ(cmp(~int64_t(0), uint64_t(0)), Cmp::LT);
@@ -117,99 +117,97 @@ TEST(Nat, IsZero) {
   EXPECT_TRUE(zero.succ().succ() > zero);
   EXPECT_TRUE(z.succ().succ() > z);
   EXPECT_TRUE(zz.succ().succ() > zz);
-  EXPECT_FALSE(ct::Nat<1>{}.is_zero());
+  EXPECT_FALSE(Nat<1>{}.is_zero());
 
-  auto x = ct::Nat<~uint64_t(0)>{};
+  auto x = Nat<~uint64_t(0)>{};
   auto y = x.succ();
 
   EXPECT_TRUE(x < y);
-  EXPECT_TRUE(y == (ct::Nat<0, 1>{}));
+  EXPECT_TRUE(y == (Nat<0, 1>{}));
 
-  EXPECT_TRUE(-x == (ct::Neg<~uint64_t(0)>{}));
+  EXPECT_TRUE(-x == (Neg<~uint64_t(0)>{}));
 
   EXPECT_EQ(z.bit_size(), 0);
   EXPECT_EQ(zz.bit_size(), 0);
   EXPECT_EQ(zero.bit_size(), 0);
-  EXPECT_EQ((ct::Nat<1, 0, 1>{}).bit_size(), 1 + 64 + 64);
+  EXPECT_EQ((Nat<1, 0, 1>{}).bit_size(), 1 + 64 + 64);
 }
 
 TEST(CtNat, low) {
-  EXPECT_EQ((ct::Nat<1, 2, 3>{}).low, 1);
-  EXPECT_EQ(ct::Nat<5>{}.low, 5);
-  EXPECT_EQ(ct::Nat<>{}.low, 0);
+  EXPECT_EQ((Nat<1, 2, 3>{}).low, 1);
+  EXPECT_EQ(Nat<5>{}.low, 5);
+  EXPECT_EQ(Nat<>{}.low, 0);
 }
 
 TEST(CtNat, high) {
-  EXPECT_TRUE((ct::Nat<1, 2, 3>{}).high() == (ct::Nat<2, 3>{}));
-  EXPECT_TRUE((ct::Nat<5>{}).high() == ct::Nat<>{});
-  EXPECT_TRUE((ct::Nat<>{}).high() == ct::Nat<>{});
+  EXPECT_TRUE((Nat<1, 2, 3>{}).high() == (Nat<2, 3>{}));
+  EXPECT_TRUE((Nat<5>{}).high() == Nat<>{});
+  EXPECT_TRUE((Nat<>{}).high() == Nat<>{});
 }
 
 TEST(CtNat, bit_size) {
-  EXPECT_EQ((ct::Nat<1, 2, 3>{}).bit_size(), 64 + 64 + 2);
-  EXPECT_EQ((ct::Nat<5>{}).bit_size(), 3);
-  EXPECT_EQ((ct::Nat<>{}).bit_size(), 0);
+  EXPECT_EQ((Nat<1, 2, 3>{}).bit_size(), 64 + 64 + 2);
+  EXPECT_EQ((Nat<5>{}).bit_size(), 3);
+  EXPECT_EQ((Nat<>{}).bit_size(), 0);
 }
 
 TEST(CtNat, is_zero) {
-  EXPECT_FALSE((ct::Nat<1, 2, 3>{}).is_zero());
-  EXPECT_FALSE((ct::Nat<5>{}).is_zero());
-  EXPECT_TRUE((ct::Nat<>{}).is_zero());
+  EXPECT_FALSE((Nat<1, 2, 3>{}).is_zero());
+  EXPECT_FALSE((Nat<5>{}).is_zero());
+  EXPECT_TRUE((Nat<>{}).is_zero());
 }
 
 TEST(CtNat, inject_right) {
-  EXPECT_TRUE((ct::Nat<1, 2, 3>{}).template inject_right<0>() ==
-              (ct::Nat<0, 1, 2, 3>{}));
-  EXPECT_TRUE((ct::Nat<5>{}).template inject_right<1>() == (ct::Nat<1, 5>{}));
-  EXPECT_TRUE((ct::Nat<>{}).template inject_right<2>() == ct::Nat<2>{});
+  EXPECT_TRUE((Nat<1, 2, 3>{}).template inject_right<0>() ==
+              (Nat<0, 1, 2, 3>{}));
+  EXPECT_TRUE((Nat<5>{}).template inject_right<1>() == (Nat<1, 5>{}));
+  EXPECT_TRUE((Nat<>{}).template inject_right<2>() == Nat<2>{});
 }
 
 TEST(CtNat, succ) {
-  EXPECT_TRUE((ct::Nat<1, 2, 3>{}).succ() == (ct::Nat<2, 2, 3>{}));
-  EXPECT_TRUE((ct::Nat<5>{}).succ() == (ct::Nat<6>{}));
-  EXPECT_TRUE((ct::Nat<>{}).succ() == ct::Nat<1>{});
-  EXPECT_TRUE((ct::Nat<~uint64_t(0)>{}).succ() == (ct::Nat<0, 1>{}));
-  EXPECT_TRUE((ct::Nat<~uint64_t(0), ~uint64_t(0), 1>{}).succ() ==
-              (ct::Nat<0, 0, 2>{}));
+  EXPECT_TRUE((Nat<1, 2, 3>{}).succ() == (Nat<2, 2, 3>{}));
+  EXPECT_TRUE((Nat<5>{}).succ() == (Nat<6>{}));
+  EXPECT_TRUE((Nat<>{}).succ() == Nat<1>{});
+  EXPECT_TRUE((Nat<~uint64_t(0)>{}).succ() == (Nat<0, 1>{}));
+  EXPECT_TRUE((Nat<~uint64_t(0), ~uint64_t(0), 1>{}).succ() ==
+              (Nat<0, 0, 2>{}));
 }
 
 TEST(CtNat, add) {
-  EXPECT_TRUE((ct::Nat<1, 2, 3>{} + ct::Nat<4, 5>{}) == (ct::Nat<5, 7, 3>{}));
-  EXPECT_TRUE((ct::Nat<5>{} + ct::Nat<6>{}) == (ct::Nat<11>{}));
-  EXPECT_TRUE((ct::Nat<>{} + ct::Nat<1, 2>{}) == (ct::Nat<1, 2>{}));
-  EXPECT_TRUE((ct::Nat<1, 2, 3>{} + ct::Nat<0, 0, 1>{}) ==
-              (ct::Nat<1, 2, 4>{}));
-  EXPECT_TRUE(ct::Nat<~uint64_t(0)>{} + ct::Nat<1>{} == (ct::Nat<0, 1>{}));
-  EXPECT_TRUE(((ct::Nat<~uint64_t(0), ~uint64_t(0)>{}) + ct::Nat<5>{}) ==
-              (ct::Nat<4, 0, 1>{}));
+  EXPECT_TRUE((Nat<1, 2, 3>{} + Nat<4, 5>{}) == (Nat<5, 7, 3>{}));
+  EXPECT_TRUE((Nat<5>{} + Nat<6>{}) == (Nat<11>{}));
+  EXPECT_TRUE((Nat<>{} + Nat<1, 2>{}) == (Nat<1, 2>{}));
+  EXPECT_TRUE((Nat<1, 2, 3>{} + Nat<0, 0, 1>{}) == (Nat<1, 2, 4>{}));
+  EXPECT_TRUE(Nat<~uint64_t(0)>{} + Nat<1>{} == (Nat<0, 1>{}));
+  EXPECT_TRUE(((Nat<~uint64_t(0), ~uint64_t(0)>{}) + Nat<5>{}) ==
+              (Nat<4, 0, 1>{}));
 }
 
 TEST(CtNat, Sub) {
-  EXPECT_TRUE((ct::Nat<8>{} - ct::Nat<3>{}) == ct::Nat<5>{});
+  EXPECT_TRUE((Nat<8>{} - Nat<3>{}) == Nat<5>{});
 
-  const auto x = ct::Nat<1, 0, 1>{};
-  const auto y = ct::Nat<2, 0, 1>{};
-  EXPECT_TRUE(y - x == ct::Nat<1>{});
-  EXPECT_TRUE(x - y == ct::Neg<1>{});
+  const auto x = Nat<1, 0, 1>{};
+  const auto y = Nat<2, 0, 1>{};
+  EXPECT_TRUE(y - x == Nat<1>{});
+  EXPECT_TRUE(x - y == Neg<1>{});
 
-  // EXPECT_EQ(y+x, (ct::Nat<3, 0, 2>{}));
-  // EXPECT_EQ(y-x, (ct::Nat<1>{}));
+  // EXPECT_EQ(y+x, (Nat<3, 0, 2>{}));
+  // EXPECT_EQ(y-x, (Nat<1>{}));
 }
 
 constexpr auto nat_values = std::make_tuple(
-    ct::Nat<1, 2, 3>{}, ct::Nat<4, 5>{}, ct::Nat<5>{}, ct::Nat<6>{},
-    ct::Nat<>{}, ct::Nat<1, 2>{}, ct::Nat<0, 0, 1>{}, ct::Nat<~uint64_t(0)>{},
-    ct::Nat<~uint64_t(0), ~uint64_t(0), 1>{});
+    Nat<1, 2, 3>{}, Nat<4, 5>{}, Nat<5>{}, Nat<6>{}, Nat<>{}, Nat<1, 2>{},
+    Nat<0, 0, 1>{}, Nat<~uint64_t(0)>{}, Nat<~uint64_t(0), ~uint64_t(0), 1>{});
 
-template <uint64_t... Vs> void one(const ct::Nat<Vs...> n) {
+template <uint64_t... Vs> void one(const Nat<Vs...> n) {
   ASSERT_TRUE(n == -(-n));
-  ASSERT_TRUE(n == n.succ() - ct::Nat<1>{});
-  ASSERT_TRUE(n - n == ct::Nat<>{});
-  ASSERT_TRUE(n - n.succ() == ct::Neg<1>{});
-  ASSERT_TRUE(n + (-n) == ct::Nat<>{});
+  ASSERT_TRUE(n == n.succ() - Nat<1>{});
+  ASSERT_TRUE(n - n == Nat<>{});
+  ASSERT_TRUE(n - n.succ() == Neg<1>{});
+  ASSERT_TRUE(n + (-n) == Nat<>{});
 
   auto neg = -n;
-  ASSERT_TRUE(neg + n == ct::Nat<>{});
+  ASSERT_TRUE(neg + n == Nat<>{});
 }
 
 TEST(CtNat, Misc) {
@@ -219,48 +217,45 @@ TEST(CtNat, Misc) {
 
 TEST(RtInt, Simple) {
 
-  constexpr auto i = rt::Int<ct::Nat<3>, ct::Nat<29>>{ct::Nat<17>{}};
-  EXPECT_TRUE(i.min == ct::Nat<3>{});
-  EXPECT_TRUE(i.max == ct::Nat<29>{});
-  EXPECT_TRUE(i.range == ct::Nat<27>{});
+  constexpr auto i = Int<Nat<3>, Nat<29>>{Nat<17>{}};
+  EXPECT_TRUE(i.min == Nat<3>{});
+  EXPECT_TRUE(i.max == Nat<29>{});
+  EXPECT_TRUE(i.range == Nat<27>{});
   EXPECT_EQ(i.bitsize, 5);
   EXPECT_EQ(i.get(0), 14);
 
-  constexpr auto j = rt::Int<ct::Neg<4>, ct::Nat<2>>{ct::Neg<3>{}};
-  EXPECT_TRUE(j.min == ct::Neg<4>{});
-  EXPECT_TRUE(j.max == ct::Nat<2>{});
-  EXPECT_TRUE(j.range == ct::Nat<7>{});
+  constexpr auto j = Int<Neg<4>, Nat<2>>{Neg<3>{}};
+  EXPECT_TRUE(j.min == Neg<4>{});
+  EXPECT_TRUE(j.max == Nat<2>{});
+  EXPECT_TRUE(j.range == Nat<7>{});
   EXPECT_EQ(j.bitsize, 3);
   EXPECT_EQ(j.get(0), 1);
 
   const auto k = i + j;
-  EXPECT_TRUE(k.min == ct::Neg<1>{});
-  EXPECT_TRUE(k.max == ct::Nat<31>{});
-  EXPECT_TRUE(k.range == ct::Nat<33>{});
+  EXPECT_TRUE(k.min == Neg<1>{});
+  EXPECT_TRUE(k.max == Nat<31>{});
+  EXPECT_TRUE(k.range == Nat<33>{});
   EXPECT_EQ(k.bitsize, 6);
   EXPECT_EQ(k.get(0), 15);
 }
 
 TEST(CtNat, ShiftLeft) {
-  EXPECT_TRUE(ct::Nat<1>{} << ct::Nat<3>{} == ct::Nat<8>{});
-  EXPECT_TRUE(ct::Nat<1>{} << ct::Nat<64>{} == (ct::Nat<0, 1>{}));
+  EXPECT_TRUE(Nat<1>{} << Nat<3>{} == Nat<8>{});
+  EXPECT_TRUE(Nat<1>{} << Nat<64>{} == (Nat<0, 1>{}));
 }
 
 TEST(UnsignedInt, Simple) {
-  const mango::rt::UnsignedInt<0> u0{};
-  EXPECT_TRUE(u0.min == ct::Nat<>{});
-  EXPECT_TRUE(u0.max == ct::Nat<>{});
+  const UnsignedInt<0> u0{};
+  EXPECT_TRUE(u0.min == Nat<>{});
+  EXPECT_TRUE(u0.max == Nat<>{});
 
-  const mango::rt::UnsignedInt<3> u3{};
-  EXPECT_TRUE(u3.min == ct::Nat<>{});
+  const UnsignedInt<3> u3{};
+  EXPECT_TRUE(u3.min == Nat<>{});
 
-  EXPECT_TRUE(u3.max == ct::Nat<7>{});
+  EXPECT_TRUE(u3.max == Nat<7>{});
 }
 
 TEST(SignedInt, Simple) {
-  using namespace mango::rt;
-  using namespace mango::ct;
-
   const SignedInt<0> s0{};
   EXPECT_TRUE(s0.min == Nat<>{});
   EXPECT_TRUE(s0.max == Nat<>{});
@@ -283,7 +278,7 @@ int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   auto out = RUN_ALL_TESTS();
 
-  std::cout << ct::Nat<0, ~uint64_t(0), 1>{}.succ() << std::endl;
+  std::cout << Nat<0, ~uint64_t(0), 1>{}.succ() << std::endl;
 
   return out;
 }
