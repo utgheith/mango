@@ -9,6 +9,8 @@
 
 using namespace mango;
 
+auto biso(const Bits<32> x) { return x.sign_extend<65>(); }
+
 TEST(Bits, Simple) {
   const Bits<3> x{5};
   const Bits<64> y{77};
@@ -105,6 +107,13 @@ TEST(Bits, shr) {
   EXPECT_EQ(b.get(0), 1);
 }
 
+TEST(Bits, extract) {
+  const Bits<66> a{2, 77};
+  const auto b = a.extract<65, 63>();
+  EXPECT_EQ(b.WIDTH, 3);
+  EXPECT_EQ(b.get(0), 4);
+}
+
 TEST(Bits, trim) {
   const auto a = ~Bits<65>{0};
   EXPECT_EQ(a.WIDTH, 65);
@@ -122,6 +131,44 @@ TEST(Bits, zero_extend) {
   EXPECT_EQ(b.WIDTH, 65);
   EXPECT_EQ(b.get(0), a.get(0));
   EXPECT_EQ(b.get(1), 0);
+}
+
+TEST(Bits, is_signed) {
+  EXPECT_TRUE(Bits<3>{4}.is_signed());
+  EXPECT_FALSE(Bits<4>{4}.is_signed());
+}
+
+TEST(Bits, sign_extend) {
+  auto a = Bits<3>{4};
+  auto b = a.sign_extend<129>();
+  EXPECT_EQ(b.WIDTH, 129);
+  EXPECT_TRUE(b.is_signed());
+  EXPECT_EQ(~(b.get(0)), 3);
+  EXPECT_EQ(~(b.get(1)), 0);
+  EXPECT_EQ(b.get(2), 1);
+}
+
+TEST(Bits, sub) {
+  for (int32_t i = -2; i < 2; i++) {
+    for (int32_t j = -2; j < 2; j++) {
+      auto diff = Bits<2>{i} - Bits<2>{j};
+      EXPECT_EQ(diff.WIDTH, 3);
+
+      EXPECT_EQ(int32_t(diff.sign_extend<64>().low), i - j);
+    }
+  }
+
+  auto z1 = Bits<1>{1} - ~Bits<200>(0);
+  EXPECT_EQ(z1.WIDTH, 201);
+  EXPECT_EQ(z1.get(0), 0);
+  EXPECT_EQ(z1.get(1), 0);
+  EXPECT_EQ(z1.get(2), 0);
+
+  auto z2 = Bits<2>{1} - ~Bits<200>(0);
+  EXPECT_EQ(z2.WIDTH, 201);
+  EXPECT_EQ(z2.get(0), 2);
+  EXPECT_EQ(z2.get(1), 0);
+  EXPECT_EQ(z2.get(2), 0);
 }
 
 #if 0

@@ -77,7 +77,11 @@ template <uint16_t N> struct Bits : public BitsState<N> {
   constexpr static uint16_t SLACK = BitsState<N>::SLACK;
   constexpr static uint64_t MASK = BitsState<N>::MASK;
 
-  constexpr Bits(const uint64_t v = 0) : BitsState<N>(v) {}
+  constexpr Bits() : BitsState<N>(0) {}
+
+  template <typename T>
+    requires std::is_integral_v<T>
+  constexpr Bits(const T v) : BitsState<N>(uint64_t(int64_t(v))) {}
 
   constexpr Bits(const Bits<safe_sub(N, 64)> &high_, const uint64_t low_)
       : BitsState<N>(high_, low_) {}
@@ -169,19 +173,83 @@ template <uint16_t N> struct Bits : public BitsState<N> {
     }
   }
 
-  template <uint16_t M> constexpr Bits<M> trim() const noexcept {
-    static_assert(M <= N);
+  template <uint16_t High, uint64_t Low>
+    requires(High >= Low) && (High < N)
+  constexpr Bits<High - Low + 1> extract() const noexcept {
+    if constexpr (Low > 64) {
+      return this->get_high().template extract<High - 64, Low - 64>();
+    } else {
+      return {this->shr<Low>()};
+    }
+  }
+
+  constexpr bool is_signed() const noexcept {
+    if constexpr (N == 0)
+      return false;
+    else
+      return extract<N - 1, N - 1>().low == 1;
+  }
+
+  template <uint16_t M>
+    requires(M <= N)
+  constexpr Bits<M> trim() const noexcept {
     return Bits<M>{*this};
   }
 
-  template <uint16_t M> constexpr Bits<M> zero_extend() const noexcept {
-    static_assert(M >= N);
+  template <uint16_t M>
+    requires(M >= N)
+  constexpr Bits<M> zero_extend() const noexcept {
     return Bits<M>{*this};
+  }
+
+  template <uint16_t M>
+    requires(M >= N)
+  constexpr Bits<M> sign_extend() const noexcept {
+#if 1
+    if constexpr (M <= N) {
+      return {*this};
+    } else if constexpr (N > 64) {
+      return {this->get_high().template sign_extend<M - 64>(), this->get_low()};
+    } else {
+      const auto signed_low =
+          (int64_t(this->get_low()) << (64 - N)) >> (64 - N);
+      if (signed_low < 0) {
+        if constexpr (M <= 64) {
+          return {uint64_t(signed_low)};
+        } else {
+          return {~Bits<M - 64>{0}, uint64_t(signed_low)};
+        }
+      } else {
+        if constexpr (M <= 64) {
+          return {this->get_low()};
+        } else {
+          return {Bits<M - 64>{0}, this->get_low()};
+        }
+      }
+    }
+#else
+    if (is_signed()) {
+      return (~Bits<M - N>{0}).concat(*this);
+    } else {
+      return zero_extend<M>();
+    }
+#endif
   }
 
   template <uint16_t M>
   constexpr auto operator+(const Bits<M> &rhs) const noexcept {
     return add<M, false>(rhs);
+  }
+
+  template <uint16_t M>
+  constexpr Bits<max(M, N) + 1> operator-(const Bits<M> &rhs) const noexcept {
+    if constexpr (M > N) {
+      return this->template sign_extend<M + 1>() +
+             ~(rhs.template sign_extend<M + 1>()) + Bits<1>{1};
+    } else {
+      return this->template sign_extend<N + 1>() +
+             ~(rhs.template sign_extend<N + 1>()) + Bits<1>{1};
+    }
   }
 
   // comparison operators
