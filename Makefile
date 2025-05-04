@@ -24,6 +24,9 @@ BUILD_FILES = meson.build Makefile
 compile : ${BUILD_FILES} ${BUILD_TAG}
 	(cd ${BUILD_DIR} && meson compile)
 
+run : compile
+	./${BUILD_DIR}/mango
+
 test: ${BUILD_FILES} ${BUILD_TAG}
 	(cd ${BUILD_DIR} && meson test)
 

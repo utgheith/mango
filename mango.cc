@@ -62,6 +62,33 @@ TEST(Bits, Constructor) {
   EXPECT_EQ(h.low, 0);
 }
 
+TEST(Bits, add) {
+  EXPECT_EQ((Bits<0>{} + Bits<0>{}).WIDTH, 0);
+  EXPECT_EQ((Bits<0>{} + Bits<1>{}).WIDTH, 1);
+  EXPECT_EQ((Bits<1>{} + Bits<0>{}).WIDTH, 1);
+  EXPECT_EQ((Bits<1>{} + Bits<1>{}).WIDTH, 2);
+  {
+    const auto a = Bits<64>{0} + Bits<1>{1};
+    EXPECT_EQ(a.WIDTH, 65);
+    EXPECT_EQ(a.get(0), 1);
+    EXPECT_EQ(a.get(1), 0);
+  }
+
+  {
+    const auto a = Bits<1>{1} + Bits<1>{1};
+    EXPECT_EQ(a.WIDTH, 2);
+    EXPECT_EQ(a.get(0), 2);
+    EXPECT_EQ(a.get(1), 0);
+  }
+
+  {
+    const auto a = ~Bits<64>{0} + Bits<1>{1};
+    EXPECT_EQ(a.WIDTH, 65);
+    EXPECT_EQ(a.get(0), 0);
+    EXPECT_EQ(a.get(1), 1);
+  }
+}
+
 #if 0
 
 TEST(Nat, Add) {
