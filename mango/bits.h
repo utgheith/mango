@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <cstdio>
-//#include <format>
+// #include <format>
 #include <iostream>
 #include <string>
 #include <type_traits>
@@ -34,7 +34,7 @@ template <uint16_t N> struct BitsState {
 
   template <uint16_t M>
   constexpr BitsState(const BitsState<M> &rhs)
-      : low(rhs.get_low()), high(rhs.get_high()) {}
+      : low(rhs.get_low() & MASK), high(rhs.get_high()) {}
 
   constexpr uint64_t get_low() const noexcept { return low; }
   constexpr auto get_high() const noexcept { return high; }
@@ -146,6 +146,37 @@ template <uint16_t N> struct Bits : public BitsState<N> {
         }
       }
     }
+  }
+
+  template <uint16_t Shift>
+  constexpr Bits<safe_sub(N, Shift)> shr() const noexcept {
+    const auto l = this->get_low();
+    const auto h = this->get_high();
+
+    if constexpr (Shift == 0) {
+      return *this;
+    } else if constexpr (Shift >= N) {
+      return Bits<0>{};
+    } else if constexpr (N <= 64) {
+      return {l >> Shift};
+    } else if constexpr (Shift >= 64) {
+      return h.template shr<Shift - 64>();
+    } else {
+      static_assert(Shift < 64);
+      static_assert(N > 64);
+      return {h.template shr<Shift>(),
+              (h.get_low() << (64 - Shift)) | (l >> Shift)};
+    }
+  }
+
+  template <uint16_t M> constexpr Bits<M> trim() const noexcept {
+    static_assert(M <= N);
+    return Bits<M>{*this};
+  }
+
+  template <uint16_t M> constexpr Bits<M> zero_extend() const noexcept {
+    static_assert(M >= N);
+    return Bits<M>{*this};
   }
 
   template <uint16_t M>

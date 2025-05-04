@@ -89,6 +89,41 @@ TEST(Bits, add) {
   }
 }
 
+TEST(Bits, concat) {
+  const Bits<65> a{1};
+  auto b = a.concat(a);
+  EXPECT_EQ(b.WIDTH, 130);
+  EXPECT_EQ(b.get(0), 1);
+  EXPECT_EQ(b.get(1), 2);
+  EXPECT_EQ(b.get(2), 0);
+}
+
+TEST(Bits, shr) {
+  const Bits<66> a{2, 77};
+  const auto b = a.shr<65>();
+  EXPECT_EQ(b.WIDTH, 1);
+  EXPECT_EQ(b.get(0), 1);
+}
+
+TEST(Bits, trim) {
+  const auto a = ~Bits<65>{0};
+  EXPECT_EQ(a.WIDTH, 65);
+  EXPECT_EQ(a.get(0), UINT64_MAX);
+  EXPECT_EQ(a.get(1), 1);
+  const auto b = a.trim<63>();
+  EXPECT_EQ(b.WIDTH, 63);
+  EXPECT_EQ(b.get(0), INT64_MAX);
+  EXPECT_EQ(b.get(1), 0);
+}
+
+TEST(Bits, zero_extend) {
+  const auto a = ~Bits<63>{INT64_MAX};
+  const auto b = a.zero_extend<65>();
+  EXPECT_EQ(b.WIDTH, 65);
+  EXPECT_EQ(b.get(0), a.get(0));
+  EXPECT_EQ(b.get(1), 0);
+}
+
 #if 0
 
 TEST(Nat, Add) {

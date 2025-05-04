@@ -88,7 +88,7 @@ constexpr Int<Nat<>, Nat<Vs...>> UInt(const Nat<Vs...> n) noexcept {
 } // namespace mango
 
 template <typename T, typename MIN, typename MAX>
-requires std::is_integral_v<T>
+  requires std::is_integral_v<T>
 constexpr auto operator-(const T lhs,
                          const mango::Int<MIN, MAX> &rhs) noexcept {
   return -(rhs - lhs);

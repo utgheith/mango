@@ -122,7 +122,7 @@ template <uint64_t Low, uint64_t... High> struct Nat<Low, High...> {
   consteval Cmp cmp(const Neg<Rs...> rhs) const noexcept;
 
   template <typename T>
-  requires std::is_integral_v<T>
+    requires std::is_integral_v<T>
   consteval Cmp cmp(const T rhs) const noexcept {
     if constexpr (std::is_signed_v<T>) {
       if (rhs < 0) {
@@ -287,7 +287,7 @@ template <uint64_t... Vs> struct Neg {
   }
 
   template <typename T>
-  requires std::is_integral_v<T>
+    requires std::is_integral_v<T>
   consteval Cmp cmp(const T rhs) const noexcept {
     if constexpr (std::is_signed_v<T>) {
       assert(false);
