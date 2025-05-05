@@ -9,6 +9,7 @@
 #include <utility>
 
 #include "common.h"
+#include "nat.h"
 
 namespace mango {
 
@@ -228,6 +229,7 @@ template <uint16_t N> struct Bits : public BitsState<N> {
       }
     }
 #else
+    // This is correct but confuses g++ and makes it produce inefficient code
     if (is_signed()) {
       return (~Bits<M - N>{0}).concat(*this);
     } else {
@@ -311,6 +313,19 @@ template <uint16_t N>
 constexpr BitsState<N>::BitsState(const uint64_t v) noexcept
     : low(v & MASK), high(Bits<safe_sub(N, 64)>{}) {
   static_assert(N > 0, "BitsState<N> requires N > 0");
+}
+
+/////////////////////
+// type conversion //
+/////////////////////
+
+template <uint64_t... Vs>
+constexpr Bits<Nat<Vs...>{}.bit_size()> to_bits(const Nat<Vs...> n) noexcept {
+  if constexpr (sizeof...(Vs) == 0) {
+    return Bits<0>{};
+  } else {
+    return {to_bits(n.high()), n.low};
+  }
 }
 
 /////////////

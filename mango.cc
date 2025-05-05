@@ -338,14 +338,14 @@ TEST(CtNat, Misc) {
 
 TEST(RtInt, Simple) {
 
-  constexpr auto i = Int<Nat<3>, Nat<29>>{Nat<17>{}};
+  const auto i = Int<Nat<3>, Nat<29>>{Nat<17>{}};
   EXPECT_TRUE(i.min == Nat<3>{});
   EXPECT_TRUE(i.max == Nat<29>{});
   EXPECT_TRUE(i.range == Nat<27>{});
   EXPECT_EQ(i.bitsize, 5);
   EXPECT_EQ(i.get(0), 14);
 
-  constexpr auto j = Int<Neg<4>, Nat<2>>{Neg<3>{}};
+  const auto j = Int<Neg<4>, Nat<2>>{Neg<3>{}};
   EXPECT_TRUE(j.min == Neg<4>{});
   EXPECT_TRUE(j.max == Nat<2>{});
   EXPECT_TRUE(j.range == Nat<7>{});

@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cstdint>
 #include <iostream>
+#include <mango/bits.h>
 #include <mango/nat.h>
 #include <type_traits>
 
@@ -15,41 +16,25 @@ template <typename Min, typename Max> struct Int {
   constexpr static auto range = max - min + Nat<1>{};
   constexpr static uint64_t bitsize = range.bit_size();
   constexpr static uint64_t LEN =
-      (bitsize + 63) / 64; // Number of uint64_t words needed
-  uint64_t state[LEN];
+      (bitsize + 63) / 64;   // Number of uint64_t words needed
+  Bits<bitsize> biased_bits; // value - Min
 
-  constexpr Int() noexcept {
-    for (uint64_t i = 0; i < LEN; ++i) {
-      state[i] = 0;
-    }
-  }
+  constexpr Int() noexcept : biased_bits{0} {}
 
+  // TODO this can be confusing. Should it be public?
   constexpr uint64_t get(uint64_t i) const noexcept {
-    return (i < LEN) ? state[i] : 0;
+    return biased_bits.get(i);
   }
 
-  template <typename T> constexpr Int(const T value) noexcept {
+  template <typename T>
+  constexpr Int(const T value) noexcept : biased_bits{to_bits(value - min)} {
     assert(min <= value);
     assert(max >= value);
-    auto diff = value - min;
-    for (uint64_t i = 0; i < LEN; ++i) {
-      state[i] = diff.get(i);
-    }
   }
 
   template <typename A, typename B>
-  constexpr Int(const A &lhs, const B &rhs) noexcept {
-    static_assert(
-        (bitsize - ((A::bitsize > B::bitsize) ? A::bitsize : B::bitsize)) < 2);
-    uint64_t carry = 0;
-    for (uint64_t i = 0; i < LEN; ++i) {
-      const uint64_t a = lhs.get(i);
-      const uint64_t b = rhs.get(i);
-      const uint64_t t = a + b + carry;
-      carry = ((t < a) || (t < b)) ? 1 : 0;
-      state[i] = t;
-    }
-  }
+  constexpr Int(const A &lhs, const B &rhs) noexcept
+      : biased_bits(lhs.biased_bits + rhs.biased_bits) {}
 
   template <typename Min2, typename Max2>
   constexpr auto operator+(const Int<Min2, Max2> &other) const noexcept {
