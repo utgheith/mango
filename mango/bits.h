@@ -104,7 +104,7 @@ template <uint16_t N> struct Bits : public BitsState<N> {
 
   // addition
 
-  template <uint16_t M, bool carry_in>
+  template <uint16_t M, uint64_t carry_in>
   consteval static uint16_t add_width() noexcept {
     if constexpr ((!carry_in) && (N == 0)) {
       return M;
@@ -118,39 +118,29 @@ template <uint16_t N> struct Bits : public BitsState<N> {
   template <uint16_t M, bool carry_in>
   using AddType = Bits<add_width<M, carry_in>()>;
 
-  template <uint16_t M, bool carry_in>
+  template <uint16_t M, uint64_t carry_in>
   constexpr AddType<M, carry_in> add(const Bits<M> &rhs) const noexcept {
-    if constexpr (carry_in) {
-      const auto out_low = this->get_low() + rhs.get_low() + 1;
-      if ((AddType<M, carry_in>::SLACK == 0) &&
-          ((out_low < this->get_low()) || (out_low < rhs.get_low()))) {
-        return {this->get_high().template add<safe_sub(M, 64), true>(
-                    rhs.get_high()),
-                out_low};
-      } else {
-        return {this->get_high().template add<safe_sub(M, 64), false>(
-                    rhs.get_high()),
-                out_low};
-      }
-    } else {
-      if constexpr (N == 0) {
-        return rhs;
-      } else if constexpr (M == 0) {
+    if constexpr (carry_in == 0) {
+      if constexpr (M == 0) {
         return *this;
-      } else {
-        const auto out_low = this->get_low() + rhs.low;
-        if ((AddType<M, carry_in>::SLACK == 0) &&
-            ((out_low < this->get_low()) || (out_low < rhs.low))) {
-          return {
-              this->get_high().template add<safe_sub(M, 64), true>(rhs.high),
-              out_low};
-        } else {
-          return {
-              this->get_high().template add<safe_sub(M, 64), false>(rhs.high),
-              out_low};
-        }
+      } else if (N == 0) {
+        return rhs;
       }
     }
+
+    const auto low_left = this->get_low();
+    const auto low_out = low_left + rhs.get_low() + carry_in;
+    const uint64_t carry_out = (low_out < low_left) ? 1 : 0;
+
+    if constexpr (AddType<M, carry_in>::SLACK == 0) {
+      if (carry_out) {
+        return {
+            this->get_high().template add<safe_sub(M, 64), 1>(rhs.get_high()),
+            low_out};
+      }
+    }
+    return {this->get_high().template add<safe_sub(M, 64), 0>(rhs.get_high()),
+            low_out};
   }
 
   template <uint16_t Shift>
@@ -240,7 +230,7 @@ template <uint16_t N> struct Bits : public BitsState<N> {
 
   template <uint16_t M>
   constexpr auto operator+(const Bits<M> &rhs) const noexcept {
-    return add<M, false>(rhs);
+    return add<M, 0>(rhs);
   }
 
   template <uint16_t M>

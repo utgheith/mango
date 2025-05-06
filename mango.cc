@@ -7,6 +7,8 @@
 #include "mango/nat.h"
 #include "gtest/gtest.h"
 
+#include "inspect.cc"
+
 using namespace mango;
 
 auto biso(const Bits<32> x) { return x.sign_extend<65>(); }
@@ -88,6 +90,11 @@ TEST(Bits, add) {
     EXPECT_EQ(a.WIDTH, 65);
     EXPECT_EQ(a.get(0), 0);
     EXPECT_EQ(a.get(1), 1);
+  }
+
+  {
+    const auto out = add(Bits<2>(1).concat(~Bits<64>(0)), Bits<61>(1));
+    EXPECT_EQ(out.WIDTH, 67);
   }
 }
 

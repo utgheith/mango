@@ -1,6 +1,9 @@
 #pragma once
 
+#include "common.h"
 #include <cassert>
+#include <cstdint>
+#include <iostream>
 
 namespace mango {
 

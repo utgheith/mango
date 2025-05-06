@@ -42,6 +42,9 @@ ${BUILD_TAG}: ${BUILD_FILES} .setup
 	-meson wrap install gtest
 	-touch .setup
 
+inspect: compile
+	objdump -d ${BUILD_DIR}/libinspect.a | c++filt
+
 clean:
 	rm -rf build .build.*
 

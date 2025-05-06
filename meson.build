@@ -12,4 +12,6 @@ main = executable('mango',
            dependencies: [gtest_dep],
            install : true)
 
+static_library('inspect', 'inspect.cc')
+
 test('basic', main)
