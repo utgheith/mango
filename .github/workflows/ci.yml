@@ -1,0 +1,41 @@
+name: CI
+on:
+    pull_request:
+    push:
+jobs:
+    Test:
+        runs-on: ${{ matrix.os }}
+        strategy:
+            fail-fast: false
+            matrix:
+                os:
+                    - ubuntu-latest
+                compiler:
+                    - gcc-14
+                    
+        steps:
+            - uses: actions/checkout@v4
+            - uses: aminya/setup-cpp@v1
+              with:
+                compiler: ${{ matrix.compiler }}
+                ninja: true
+                meson: true
+                make: true
+                python: true
+                gcovr: true
+                setup-cpp: true
+
+            - name: run
+              run: |
+                  CXX=cxx make run
+
+            #- name: check environment
+            #  run: |
+            #    cat .cpprc
+
+            #- name: compile
+            #  run: make compile
+
+            #- name: test
+            #  run: make test
+            
