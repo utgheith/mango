@@ -381,6 +381,24 @@ TEST(UnsignedInt, Simple) {
   EXPECT_TRUE(u3.min == Nat<>{});
 
   EXPECT_TRUE(u3.max == Nat<7>{});
+
+  auto a = UInt(Nat<3>{});
+  EXPECT_TRUE(a.min == Nat<3>{});
+  EXPECT_TRUE(a.max == Nat<3>{});
+  EXPECT_EQ(a.get(0), 0);
+
+  const auto v = a + UInt(Nat<7>{});
+  EXPECT_TRUE(v.min == Nat<10>{});
+  EXPECT_TRUE(v.max == Nat<10>{});
+  EXPECT_TRUE(v.get(0) == 0);
+
+  {
+    Bits<3> b3{2};
+    const auto u3 = UInt(b3);
+    EXPECT_TRUE(u3.min == Nat<>{});
+    EXPECT_TRUE(u3.max == Nat<7>{});
+    EXPECT_EQ(b3.get(0), 2);
+  }
 }
 
 TEST(SignedInt, Simple) {
@@ -391,14 +409,29 @@ TEST(SignedInt, Simple) {
   const SignedInt<3> s3{};
   EXPECT_TRUE(s3.min == Neg<4>{});
   EXPECT_TRUE(s3.max == Nat<3>{});
+}
 
-  const auto v = UInt(Nat<3>{}) + UInt(Nat<7>{});
-  EXPECT_TRUE(v.min == Nat<>{});
-  EXPECT_TRUE(v.max == Nat<10>{});
-  EXPECT_TRUE(v.get(0) == 10);
+TEST(Inspect, all) {
+  const auto n12 = add(Nat<5>{}, Nat<7>{});
+  EXPECT_EQ(n12.get(0), 12);
+  EXPECT_EQ(n12.bit_size(), 4);
+  EXPECT_FALSE(n12.is_zero());
 
-  // const auto v = SInt<3>{3} + SInt<7>{2};
-  // EXPECT_EQ(v.min, Neg<67>{});
+  const auto b19 = add(Bits<7>{2}, Bits<12>{3});
+  EXPECT_EQ(b19.WIDTH, 13);
+  EXPECT_EQ(b19.get(0), 5);
+  EXPECT_EQ(b19.MASK, 0x1FFF);
+
+  const auto b67 = add(Bits<2>{1}.concat(~Bits<64>{0}), Bits<61>{1});
+  EXPECT_EQ(b67.WIDTH, 67);
+  EXPECT_EQ(b67.get_high().MASK, 7);
+  EXPECT_EQ(b67.get(0), 0);
+  EXPECT_EQ(b67.get(1), 2);
+
+  auto u13 = add(UInt(Bits<12>{12}), UInt(Bits<5>{5}));
+  EXPECT_EQ(u13.biased_bits.get(0), 17);
+  EXPECT_EQ(u13.min.get(0), 0);
+  EXPECT_EQ(u13.max.get(0), (1 << 12) - 1 + (1 << 5) - 1);
 }
 
 int main(int argc, char **argv) {
