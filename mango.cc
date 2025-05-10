@@ -194,11 +194,9 @@ TEST(Bits, flip_bit) {
   {
     auto o = Bits<0>{}.flip_bit<2000>();
     EXPECT_EQ(o.WIDTH, 2001);
-    EXPECT_TRUE((o.extract<1999,0>()) == Bits<0>{});
+    EXPECT_TRUE((o.extract<1999, 0>()) == Bits<0>{});
     EXPECT_EQ(o.shr<2000>(), Bits<1>{1});
   }
-
-  
 }
 
 #if 0
@@ -432,6 +430,20 @@ TEST(SignedInt, Simple) {
   const SignedInt<3> s3{};
   EXPECT_TRUE(s3.min == Neg<4>{});
   EXPECT_TRUE(s3.max == Nat<3>{});
+
+  {
+    auto s = SInt(Bits<1>{1});
+    EXPECT_TRUE(s.min == Neg<1>{});
+    EXPECT_TRUE(s.max == Nat<>{});
+    EXPECT_EQ(s.biased_bits, Bits<0>{});
+  }
+
+  {
+    auto s = SInt(Bits<1>{0});
+    EXPECT_TRUE(s.min == Neg<1>{});
+    EXPECT_TRUE(s.max == Nat<>{});
+    EXPECT_EQ(s.biased_bits, Bits<1>{1});
+  }
 }
 
 TEST(Inspect, all) {
@@ -456,8 +468,6 @@ TEST(Inspect, all) {
   EXPECT_EQ(u13.min.get(0), 0);
   EXPECT_EQ(u13.max.get(0), (1 << 12) - 1 + (1 << 5) - 1);
 }
-
-
 
 int main(int argc, char **argv) {
   printf("hello\n");

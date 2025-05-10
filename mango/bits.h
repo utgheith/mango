@@ -295,12 +295,14 @@ template <uint16_t N> struct Bits : public BitsState<N> {
   }
 
   template <uint16_t F>
-  constexpr const Bits<uint16_t(mango::safe_max(uint16_t(F+uint16_t(1)), N))> flip_bit() const noexcept {
+  constexpr const Bits<uint16_t(mango::safe_max(uint16_t(F + uint16_t(1)), N))>
+  flip_bit() const noexcept {
     if constexpr (F < 64) {
       const auto mask = uint64_t(1) << F;
       return {this->get_high(), this->get_low() ^ mask};
     } else {
-      return {this->get_high().template flip_bit<safe_sub(F, 64)>(), this->get_low()};
+      return {this->get_high().template flip_bit<safe_sub(F, 64)>(),
+              this->get_low()};
     }
   }
 };

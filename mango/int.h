@@ -45,11 +45,20 @@ template <typename Min, typename Max> struct Int {
 template <uint16_t N>
 using UnsignedInt = Int<Nat<>, decltype((Nat<1>{} << Nat<N>{}) - Nat<1>{})>;
 
-template <uint64_t N>
-struct SignedInt : Int<decltype(-(Nat<1>{} << Nat<(N - 1)>{})),
-                       decltype((Nat<1>{} << Nat<(N - 1)>{}) - Nat<1>{})> {};
+template <uint16_t N>
+using SIT = Int<decltype(-(Nat<1>{} << Nat<(N - 1)>{})),
+                decltype((Nat<1>{} << Nat<(N - 1)>{}) - Nat<1>{})>;
 
-template <> struct SignedInt<0> : Int<Nat<>, Nat<>> {};
+template <uint64_t N> struct SignedInt : SIT<N> {
+  constexpr SignedInt() : SIT<N>{} {}
+  constexpr SignedInt(const Bits<N> &bv, const bool h) : SIT<N>(bv, h) {}
+};
+
+template <> struct SignedInt<0> : Int<Nat<>, Nat<>> {
+  constexpr SignedInt() : Int<Nat<>, Nat<>>() {}
+  constexpr SignedInt(const Bits<0> &bv, const bool h)
+      : Int<Nat<>, Nat<>>(bv, h) {}
+};
 
 template <typename Min, typename Max>
 std::ostream &operator<<(std::ostream &os, const Int<Min, Max> &value) {
@@ -70,8 +79,10 @@ template <uint16_t N> constexpr UnsignedInt<N> UInt(const Bits<N> &b) noexcept {
   return {b, true};
 }
 
+template <uint16_t N> constexpr SignedInt<N> SInt(const Bits<N> &b) noexcept {
+  return {b.template flip_bit<N - 1>(), true};
+}
 
-  
 } // namespace mango
 
 template <typename T, typename MIN, typename MAX>

@@ -14,6 +14,4 @@ auto add(const UnsignedInt<12> a, const UnsignedInt<5> b) noexcept {
   return a + b;
 }
 
-auto flip_bit(const Bits<129> b) noexcept {
-  return b.flip_bit<128>();
-}
+auto flip_bit(const Bits<129> b) noexcept { return b.flip_bit<128>(); }
