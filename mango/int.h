@@ -70,8 +70,8 @@ template <uint16_t N> constexpr UnsignedInt<N> UInt(const Bits<N> &b) noexcept {
   return {b, true};
 }
 
-template <uint16_t N> constexpr SignedInt<N> SInt(const Bits<N> &b) noexcept {}
 
+  
 } // namespace mango
 
 template <typename T, typename MIN, typename MAX>

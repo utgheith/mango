@@ -178,6 +178,29 @@ TEST(Bits, sub) {
   EXPECT_EQ(z2.get(2), 0);
 }
 
+TEST(Bits, flip_bit) {
+  auto o = flip_bit(Bits<129>{0});
+  EXPECT_EQ(o.WIDTH, 129);
+  EXPECT_EQ(o.get(0), 0);
+  EXPECT_EQ(o.get(1), 0);
+  EXPECT_EQ(o.get(2), 1);
+
+  auto o2 = Bits<1>{1}.concat(Bits<128>{0}).flip_bit<128>();
+  EXPECT_EQ(o2.get(0), 0);
+  EXPECT_EQ(o2.get(1), 0);
+  EXPECT_EQ(o2.get(2), 0);
+  EXPECT_EQ(o2, Bits<0>{});
+
+  {
+    auto o = Bits<0>{}.flip_bit<2000>();
+    EXPECT_EQ(o.WIDTH, 2001);
+    EXPECT_TRUE((o.extract<1999,0>()) == Bits<0>{});
+    EXPECT_EQ(o.shr<2000>(), Bits<1>{1});
+  }
+
+  
+}
+
 #if 0
 
 TEST(Nat, Add) {
@@ -338,12 +361,12 @@ template <uint64_t... Vs> void one(const Nat<Vs...> n) {
   ASSERT_TRUE(neg + n == Nat<>{});
 }
 
-TEST(CtNat, Misc) {
+TEST(Nat, Misc) {
 
   std::apply([](auto &&...args) { ((one(args)), ...); }, nat_values);
 }
 
-TEST(RtInt, Simple) {
+TEST(Int, Simple) {
 
   const auto i = Int<Nat<3>, Nat<29>>{Nat<17>{}};
   EXPECT_TRUE(i.min == Nat<3>{});
@@ -367,7 +390,7 @@ TEST(RtInt, Simple) {
   EXPECT_EQ(k.get(0), 15);
 }
 
-TEST(CtNat, ShiftLeft) {
+TEST(Nat, ShiftLeft) {
   EXPECT_TRUE(Nat<1>{} << Nat<3>{} == Nat<8>{});
   EXPECT_TRUE(Nat<1>{} << Nat<64>{} == (Nat<0, 1>{}));
 }
@@ -433,6 +456,8 @@ TEST(Inspect, all) {
   EXPECT_EQ(u13.min.get(0), 0);
   EXPECT_EQ(u13.max.get(0), (1 << 12) - 1 + (1 << 5) - 1);
 }
+
+
 
 int main(int argc, char **argv) {
   printf("hello\n");

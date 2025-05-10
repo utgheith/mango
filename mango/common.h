@@ -11,8 +11,13 @@ namespace mango {
 
 typedef unsigned int uint128_t __attribute__((mode(TI)));
 
-constexpr uint16_t safe_sub(uint16_t a, uint16_t b) {
+constexpr uint16_t safe_sub(const uint16_t a, const uint16_t b) noexcept {
   return (a < b) ? uint16_t(0) : uint16_t(a - b);
+}
+
+template <typename T>
+constexpr const T safe_max(const T a, const T b) noexcept {
+  return (a > b) ? a : b;
 }
 
 consteval uint16_t clz(uint64_t a) {
