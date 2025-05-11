@@ -39,7 +39,7 @@ ${BUILD_TAG}: ${BUILD_FILES} .setup
 
 .setup: ${BUILD_FILES}
 	-mkdir -p subprojects
-	-meson wrap install gtest
+	#-meson wrap install gtest
 	-touch .setup
 
 inspect: compile

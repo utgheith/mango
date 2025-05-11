@@ -6,7 +6,7 @@
 #include "mango/int.h"
 #include "mango/masked_bits.h"
 #include "mango/nat.h"
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 #include "inspect.cc"
 

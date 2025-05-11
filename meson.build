@@ -7,6 +7,7 @@ cpp.has_header('format')
 
 gtest_dep = dependency('gtest')
 
+
 main = executable('mango',
            'mango.cc',
            dependencies: [gtest_dep],
