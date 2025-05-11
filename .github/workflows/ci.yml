@@ -17,31 +17,24 @@ jobs:
                     
         steps:
             - uses: actions/checkout@v4
-            - name: Install libstdc++-14
-              run: sudo apt install -y libstdc++-14-dev
-            - name: Install gtest
-              run: sudo apt install -y libgtest-dev
             - uses: aminya/setup-cpp@v1
               with:
                 compiler: ${{ matrix.compiler }}
                 ninja: true
                 meson: true
-                make: true
                 python: true
                 gcovr: true
                 setup-cpp: true
-
-            - name: run
+            - name: show env
+              run: env
+            - name: setup build directory
               run: |
-                  CXX=cxx make run
+                mkdir -p subprojects
+                meson wrap install gtest
+                meson setup --buildtype release --werror build .
+            - name: compile
+              run: (cd build ; meson compile)
+            - name: run
+              run: (cd build ; ./mango)
 
-            #- name: check environment
-            #  run: |
-            #    cat .cpprc
-
-            #- name: compile
-            #  run: make compile
-
-            #- name: test
-            #  run: make test
             
