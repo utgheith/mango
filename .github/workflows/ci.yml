@@ -17,6 +17,8 @@ jobs:
                     
         steps:
             - uses: actions/checkout@v4
+            - name: Install libstdc++-14
+              run: sudo apt install -y libstdc++-14-dev
             - uses: aminya/setup-cpp@v1
               with:
                 compiler: ${{ matrix.compiler }}
