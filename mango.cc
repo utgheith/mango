@@ -200,6 +200,19 @@ TEST(Bits, flip_bit) {
   }
 }
 
+TEST(MaskedBits, simple) {
+  {
+    const auto a =
+        adc(MaskedBits<32, Nat<0x80000000>, Nat<0x80000000>>{0x12345678});
+    EXPECT_EQ(a.WIDTH, 64);
+  }
+  {
+    const auto a =
+        adc(MaskedBits<32, Nat<0x80000000>, Nat<0x00000000>>{0x12345678});
+    EXPECT_EQ(a.WIDTH, 32);
+  }
+}
+
 #if 0
 
 TEST(Nat, Add) {
@@ -390,13 +403,13 @@ TEST(Int, Simple) {
 }
 
 TEST(Nat, ShiftLeft) {
-  EXPECT_TRUE(Nat<1>{} << Nat<3>{} == Nat<8>{});
-  EXPECT_TRUE(Nat<1>{} << Nat<64>{} == (Nat<0, 1>{}));
+  EXPECT_TRUE((Nat<1>{} << Nat<3>{}) == Nat<8>{});
+  EXPECT_TRUE((Nat<1>{} << Nat<64>{}) == (Nat<0, 1>{}));
 }
 
 TEST(Nat, ShiftRight) {
-  EXPECT_TRUE(Nat<8>{} >> Nat<3>{} == Nat<1>{});
-  EXPECT_TRUE((Nat<0, 1>{}) >> Nat<64>{} == (Nat<1>{}));
+  EXPECT_TRUE((Nat<8>{} >> Nat<3>{}) == Nat<1>{});
+  EXPECT_TRUE(((Nat<0, 1>{}) >> Nat<64>{}) == (Nat<1>{}));
 }
 
 TEST(UnsignedInt, Simple) {
