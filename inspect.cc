@@ -15,3 +15,7 @@ auto add(const UnsignedInt<12> a, const UnsignedInt<5> b) noexcept {
 }
 
 auto flip_bit(const Bits<129> b) noexcept { return b.flip_bit<128>(); }
+
+auto shr(const Nat<0x12345678, 0xf0f0f0f0f0> x) noexcept {
+  return x >> Nat<4>{};
+}

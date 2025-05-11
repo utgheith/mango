@@ -4,6 +4,7 @@
 
 #include "mango/bits.h"
 #include "mango/int.h"
+#include "mango/masked_bits.h"
 #include "mango/nat.h"
 #include "gtest/gtest.h"
 
@@ -391,6 +392,11 @@ TEST(Int, Simple) {
 TEST(Nat, ShiftLeft) {
   EXPECT_TRUE(Nat<1>{} << Nat<3>{} == Nat<8>{});
   EXPECT_TRUE(Nat<1>{} << Nat<64>{} == (Nat<0, 1>{}));
+}
+
+TEST(Nat, ShiftRight) {
+  EXPECT_TRUE(Nat<8>{} >> Nat<3>{} == Nat<1>{});
+  EXPECT_TRUE((Nat<0, 1>{}) >> Nat<64>{} == (Nat<1>{}));
 }
 
 TEST(UnsignedInt, Simple) {

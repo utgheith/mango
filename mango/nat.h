@@ -74,6 +74,27 @@ template <uint64_t Low, uint64_t... High> struct Nat<Low, High...> {
     }
   }
 
+  //////////////// Nat<...>::shift_right /////////////////
+
+  template <uint64_t... Rs>
+  consteval auto operator>>(const Nat<Rs...> rhs) const noexcept {
+    if constexpr (rhs.is_zero()) {
+      return *this;
+    } else if constexpr (rhs >= Nat<64>{}) {
+      return Nat<High...>{} >> (rhs - Nat<64>{});
+    } else {
+      if constexpr (Nat<High...>{}.is_zero()) {
+        return Nat<(low >> rhs.low)>{};
+      } else {
+        static_assert(rhs.low < 64);
+        const auto new_high = high() >> rhs;
+        const auto new_low_low = low << (64 - rhs.low) >> (64 - rhs.low);
+        const auto new_low_high = high().low << rhs.low;
+        return new_high.template inject_right<new_low_high + new_low_low>();
+      }
+    }
+  }
+
   ///////////////// Nat<...>::addition ////////////////
 
   template <uint64_t... Rs>
@@ -196,10 +217,17 @@ template <> struct Nat<> {
     return {};
   }
 
-  ///////////////// Shift left /////////////////////
+  ///////////////// Nat<>::Shift left /////////////////////
 
   template <uint64_t... Rs>
   consteval auto operator<<(const Nat<Rs...>) const noexcept {
+    return *this;
+  }
+
+  ///////////////// Nat<>::Shift right /////////////////////
+
+  template <uint64_t... Rs>
+  consteval auto operator>>(const Nat<Rs...>) const noexcept {
     return *this;
   }
 
